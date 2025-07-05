@@ -30,6 +30,7 @@
 # def on_press(key):
 #     print(f"Pressed: {key}")
 
+#note to myself : previous one failed xoxo
 import keyboard
 
 def listen_hotkey():
