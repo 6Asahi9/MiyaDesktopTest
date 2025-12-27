@@ -13,7 +13,7 @@ from core.fur import switch_fur
 from core.page_switch import switch_to_main, create_app_manager_page
 from core.mic_handler import activate_miya_listener
 import keyboard
-from core.path import ASSETS_PATH, MIYA
+from core.path import get_avatar_path
 
 class ToggleAnimation(QPushButton):
     toggled = pyqtSignal(bool)
@@ -59,7 +59,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Miya Desktop")
-        self.setFixedSize(700, 560)
+        self.setFixedSize(700, 600)
 
         self.neon_enabled = True
         self.neon_color = "#00ffff"
@@ -119,6 +119,8 @@ class MainWindow(QWidget):
         self.miya_frame.setStyleSheet(neon_style)
 
     def style_neon_button(self, btn):
+        size = self.font_size_input.value()
+
         if self.neon_enabled:
             btn.setStyleSheet(f"""
                 QPushButton {{
@@ -127,30 +129,34 @@ class MainWindow(QWidget):
                     border: none;
                     border-radius: 8px;
                     padding: 6px 12px;
+                    font-family: 'Segoe UI';
+                    font-size: {size}px;
+                    font-weight: normal;
                 }}
                 QPushButton:hover {{
                     background-color: white;
                 }}
             """)
         else:
-            btn.setStyleSheet("""
-                QPushButton {
+            btn.setStyleSheet(f"""
+                QPushButton {{
                     background-color: #333333;
                     color: white;
                     border: none;
                     border-radius: 8px;
                     padding: 6px 12px;
-                }
-                QPushButton:hover {
+                    font-family: 'Segoe UI';
+                    font-size: {size}px;
+                    font-weight: normal;
+                }}
+                QPushButton:hover {{
                     background-color: #444444;
-                }
+                }}
             """)
 
     def apply_font_size(self):
         size = self.font_size_input.value()
-        font = QFont("Segoe UI", size)
         self.font_size_input.setFont(QFont("Segoe UI", size))
-
         self.left_panel.setStyleSheet(f"""
             * {{
                 font-size: {size}px;
@@ -158,9 +164,13 @@ class MainWindow(QWidget):
             }}
         """)
 
-        for label in self.toggle_labels:
-            label.setFont(font)
+        if hasattr(self, "custom_btn"):
+            self.style_neon_button(self.custom_btn)
 
+        for btn in (self.app_btn, self.music_btn, self.color_btn):
+            self.style_neon_button(btn)
+
+    
     def build_toggle_row(self, label_text, default_checked, slot_fn=None, red=False):
         toggle = ToggleAnimation(self.neon_color)
         toggle.setChecked(default_checked)
@@ -259,14 +269,28 @@ class MainWindow(QWidget):
         font_widget.setContentsMargins(0, 0, 0, 0)
         font_widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
 
+        # --------------------------------
+        self.music_btn = QPushButton("Music")
+        self.music_btn.setFixedSize(300, 40)
+        self.music_btn.clicked.connect(lambda: print("🎵 Music button clicked"))
+
+        self.custom_btn = QPushButton("Custom", ui_container)
+        self.custom_btn.setFixedSize(150, 40)
+        self.custom_btn.move(450, 270)
+        self.custom_btn.clicked.connect(lambda: print("Custom clicked"))
+        self.style_neon_button(self.custom_btn)
+        self.custom_btn.show()
+        # --------------------------------
+
         self.color_btn = QPushButton("Choose Neon Color")
         self.color_btn.setFixedSize(300, 40)
         self.color_btn.clicked.connect(self.pick_neon_color)
 
         self.style_neon_button(self.app_btn)
+        self.style_neon_button(self.music_btn)
         self.style_neon_button(self.color_btn)
 
-        for widget in [theme_widget, avatar_widget, startup_widget, self.app_btn, font_widget, neon_widget, self.color_btn, demon_widget, demon_warning]:
+        for widget in [theme_widget, avatar_widget, startup_widget, self.app_btn, font_widget, self.music_btn, neon_widget, self.color_btn, demon_widget, demon_warning]:
             button_layout.addWidget(widget)
 
         self.left_panel = QWidget()
@@ -282,8 +306,7 @@ class MainWindow(QWidget):
         miya_layout = QVBoxLayout()
 
         miya_image = QLabel()
-        # movie = QMovie("assets/placeholder_miya.gif")
-        movie = QMovie(str(MIYA))
+        movie = QMovie(str(get_avatar_path()))
         movie.setScaledSize(QSize(200, 150))
         miya_image.setMovie(movie)
         movie.start()
@@ -318,7 +341,10 @@ class MainWindow(QWidget):
         miya_layout.addLayout(fur_row)
         self.miya_frame.setLayout(miya_layout)
 
+        miya_container.addSpacing(40)
         miya_container.addWidget(self.miya_frame)
+
+        # -------------------------------------
         miya_container.addStretch()
 
         ui_layout.addLayout(miya_container)
@@ -334,8 +360,8 @@ class MainWindow(QWidget):
     def toggle_neon(self, checked):
         self.neon_enabled = checked
         self.update_neon_styles()
-        self.style_neon_button(self.app_btn)
-        self.style_neon_button(self.color_btn)
+        for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn):
+            self.style_neon_button(btn)
         for toggle in self.toggle_refs:
             toggle.update_neon_color(self.neon_color)
 
@@ -346,5 +372,6 @@ class MainWindow(QWidget):
             for toggle in self.toggle_refs:
                 toggle.update_neon_color(self.neon_color)
             self.update_neon_styles()
-            self.style_neon_button(self.app_btn)
-            self.style_neon_button(self.color_btn)
+            for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn):
+                self.style_neon_button(btn)
+

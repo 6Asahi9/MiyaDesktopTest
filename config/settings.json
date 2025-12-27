@@ -4,5 +4,6 @@
     "avatar_visible": true,
     "startup": false,
     "apps": {},
-    "floating_miya_enabled": true
+    "floating_miya_enabled": true,
+    "added_apps": []
 }

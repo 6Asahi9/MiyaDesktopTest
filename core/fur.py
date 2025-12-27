@@ -1,4 +1,4 @@
-furs = ["White", "Calico", "Tabby", "Orange"]
+furs = ["White", "Calico", "Tabby", "Orange", "custom"]
 
 def switch_fur(direction, label):
     current = label.text()
