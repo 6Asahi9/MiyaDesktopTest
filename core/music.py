@@ -1,18 +1,21 @@
 import json
 from pathlib import Path
+from random import choice
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel,
-    QFrame, QSlider
+    QFrame, QSlider, QHBoxLayout
 )
-from PyQt6.QtGui import QMovie
+from PyQt6.QtGui import QMovie, QKeySequence, QShortcut
 from PyQt6.QtCore import Qt, QSize, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
-from core.path import MUSIC_PATH, PLAYER_PATH, SETTINGS_JSON
-from core.music_picker import MusicPickerDialog 
-from random import choice
-from PyQt6.QtGui import QKeySequence, QShortcut
 
-# JSON helpers
+from core.path import MUSIC_PATH, PLAYER_PATH, SETTINGS_JSON
+from core.music_picker import MusicPickerDialog
+
+
+# JSON helpers ----------------
+
 def load_settings():
     if SETTINGS_JSON.exists():
         try:
@@ -21,6 +24,7 @@ def load_settings():
             pass
     return {}
 
+
 def save_settings(data):
     SETTINGS_JSON.parent.mkdir(parents=True, exist_ok=True)
     SETTINGS_JSON.write_text(
@@ -28,10 +32,14 @@ def save_settings(data):
         encoding="utf-8"
     )
 
-# Music page
+
+# Music page ----------------
+
 def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     page = QFrame()
     page.setObjectName("musicNeonFrame")
+    page.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
     layout = QVBoxLayout(page)
 
     # Neon border
@@ -50,7 +58,8 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
 
     settings = load_settings()
 
-    # Helper to style buttons
+    # helpers ----------
+
     def style_neon_button(btn):
         if neon_enabled:
             btn.setStyleSheet(f"""
@@ -81,20 +90,61 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
                 }
             """)
 
-    # Hint
+    def get_music_files():
+        return sorted(f.name for f in MUSIC_PATH.iterdir() if f.is_file())
+
+    def play_song(name):
+        path = MUSIC_PATH / name
+        if not path.exists():
+            return
+        settings["last_music"] = name
+        save_settings(settings)
+        now_playing.setText(name)
+        player.setSource(QUrl.fromLocalFile(str(path)))
+        player.play()
+        movie.start()
+
+    def play_next():
+        music_files = get_music_files()
+        current = settings.get("last_music")
+
+        if not music_files:
+            return
+
+        if current not in music_files:
+            play_song(music_files[0])
+            return
+
+        idx = music_files.index(current)
+        play_song(music_files[(idx + 1) % len(music_files)])
+
+    def play_previous():
+        music_files = get_music_files()
+        current = settings.get("last_music")
+
+        if not music_files:
+            return
+
+        if current not in music_files:
+            play_song(music_files[0])
+            return
+
+        idx = music_files.index(current)
+        play_song(music_files[(idx - 1) % len(music_files)])
+
+    # UI ----------
+
     music_dir = Path.home() / "MiyaDesktop" / "Music"
     music_hint = QLabel(f"🎵 Add music files to:\n{music_dir}")
     music_hint.setStyleSheet("color: #888; font-size: 10px; padding-top: 4px;")
     music_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
     layout.addWidget(music_hint)
 
-    # Now playing
     now_playing = QLabel("No music selected")
     now_playing.setStyleSheet("color: white; font-size: 12px;")
     now_playing.setAlignment(Qt.AlignmentFlag.AlignCenter)
     layout.addWidget(now_playing)
 
-    # Animation
     player_label = QLabel()
     player_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
     movie = QMovie(str(PLAYER_PATH))
@@ -102,7 +152,6 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     player_label.setMovie(movie)
     layout.addWidget(player_label)
 
-    # Controls
     play_btn = QPushButton("Play / Pause")
     style_neon_button(play_btn)
 
@@ -117,17 +166,15 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     layout.addWidget(volume_slider)
     layout.addWidget(dots_btn)
 
-# ------------------------------------------------------------------------------------
-    playback_mode = "repeat" 
-    # Mode buttons
-    from PyQt6.QtWidgets import QHBoxLayout
+    # Playback modes ----------
+
+    playback_mode = "repeat"
 
     mode_layout = QHBoxLayout()
     repeat_btn = QPushButton("Repeat")
     juggle_btn = QPushButton("Juggle")
     straight_btn = QPushButton("Straight")
 
-    # Style buttons
     for btn in (repeat_btn, juggle_btn, straight_btn):
         style_neon_button(btn)
         btn.setFixedWidth(80)
@@ -137,15 +184,13 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     mode_layout.addWidget(straight_btn)
     layout.addLayout(mode_layout)
 
-    # Function to highlight active mode
     def update_mode_buttons():
-        repeat_btn.setStyleSheet(repeat_btn.styleSheet() + ("border: 2px solid #ffff00;" if playback_mode=="repeat" else ""))
-        juggle_btn.setStyleSheet(juggle_btn.styleSheet() + ("border: 2px solid #ffff00;" if playback_mode=="juggle" else ""))
-        straight_btn.setStyleSheet(straight_btn.styleSheet() + ("border: 2px solid #ffff00;" if playback_mode=="straight" else ""))
+        repeat_btn.setStyleSheet(repeat_btn.styleSheet() + ("border:2px solid #ffff00;" if playback_mode == "repeat" else ""))
+        juggle_btn.setStyleSheet(juggle_btn.styleSheet() + ("border:2px solid #ffff00;" if playback_mode == "juggle" else ""))
+        straight_btn.setStyleSheet(straight_btn.styleSheet() + ("border:2px solid #ffff00;" if playback_mode == "straight" else ""))
 
     update_mode_buttons()
 
-    # Button click callbacks
     def set_repeat():
         nonlocal playback_mode
         playback_mode = "repeat"
@@ -168,74 +213,68 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     juggle_btn.clicked.connect(set_juggle)
     straight_btn.clicked.connect(set_straight)
 
-    # Playback end logic ---
     def handle_song_finished():
-        nonlocal playback_mode
-        last_music_name = settings.get("last_music")
-        if not last_music_name:
+        last_music = settings.get("last_music")
+        if not last_music:
             return
-        music_files = sorted(f.name for f in MUSIC_PATH.iterdir() if f.is_file())
+
+        music_files = get_music_files()
+
         if playback_mode == "repeat":
-            player.setSource(QUrl.fromLocalFile(str(MUSIC_PATH / last_music_name)))
-            player.play()
-            movie.start()
+            play_song(last_music)
+
         elif playback_mode == "juggle":
-            next_song = choice(music_files)
-            settings["last_music"] = next_song
-            save_settings(settings)
-            now_playing.setText(next_song)
-            player.setSource(QUrl.fromLocalFile(str(MUSIC_PATH / next_song)))
-            player.play()
-            movie.start()
+            play_song(choice(music_files))
+
         elif playback_mode == "straight":
-            if last_music_name in music_files:
-                idx = music_files.index(last_music_name)
-                if idx + 1 < len(music_files):
-                    next_song = music_files[idx + 1]
-                    settings["last_music"] = next_song
-                    save_settings(settings)
-                    now_playing.setText(next_song)
-                    player.setSource(QUrl.fromLocalFile(str(MUSIC_PATH / next_song)))
-                    player.play()
-                    movie.start()
-                else:
-                    next_song = music_files[0]
-                    settings["last_music"] = next_song
-                    save_settings(settings)
-                    now_playing.setText(next_song)
-                    player.setSource(QUrl.fromLocalFile(str(MUSIC_PATH / next_song)))
-                    player.play()
-                    movie.start()
+            idx = music_files.index(last_music)
+            play_song(music_files[(idx + 1) % len(music_files)])
 
     player.mediaStatusChanged.connect(
-        lambda status: handle_song_finished() if status == QMediaPlayer.MediaStatus.EndOfMedia else None
+        lambda status: handle_song_finished()
+        if status == QMediaPlayer.MediaStatus.EndOfMedia else None
     )
-# ------------------------------------------------------------------------------------
 
-    # Back button
-    back_btn = QPushButton("Back")
-    back_btn.setFixedSize(120, 50)
-    style_neon_button(back_btn)
-    back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
+    # Shortcuts ----------
+    QShortcut(QKeySequence(Qt.Key.Key_Up), page).activated.connect(
+    lambda: (
+        print("Up arrow → volume up"),
+        volume_slider.setValue(min(volume_slider.value() + 5, 100))
+    )
+    )
 
-    layout.addStretch()
-    layout.addWidget(back_btn)
+    QShortcut(QKeySequence(Qt.Key.Key_Down), page).activated.connect(
+        lambda: (
+            print("Down arrow → volume down"),
+            volume_slider.setValue(max(volume_slider.value() - 5, 0))
+        )
+    )
 
-    # Restore state
-    last_music = settings.get("last_music")
-    paused = settings.get("music_paused", True)
-    volume = settings.get("music_volume", 60)
+    QShortcut(QKeySequence(Qt.Key.Key_Space), page).activated.connect(
+    lambda: (print("Enter → Play/Pause"), toggle_play())
+    )
 
-    audio.setVolume(volume / 100)
-    volume_slider.setValue(volume)
+    QShortcut(QKeySequence(Qt.Key.Key_Right), page).activated.connect(
+        lambda: (print("Right arrow → next song"), play_next())
+    )
 
-    if last_music:
-        path = MUSIC_PATH / last_music
-        if path.exists():
-            player.setSource(QUrl.fromLocalFile(str(path)))
-            now_playing.setText(last_music)
+    QShortcut(QKeySequence(Qt.Key.Key_Left), page).activated.connect(
+        lambda: (print("Left arrow → previous song"), play_previous())
+    )
 
-    # Logic
+    # Restore state ----------
+
+    audio.setVolume(settings.get("music_volume", 60) / 100)
+    volume_slider.setValue(settings.get("music_volume", 60))
+
+    if settings.get("last_music"):
+        play_song(settings["last_music"])
+        if settings.get("music_paused", True):
+            player.pause()
+            movie.stop()
+
+    # Controls ----------
+
     def toggle_play():
         if player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
             player.pause()
@@ -249,27 +288,36 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
 
     play_btn.clicked.connect(toggle_play)
 
-    def change_volume(v):
-        audio.setVolume(v / 100)
-        settings["music_volume"] = v
-        save_settings(settings)
-
-    volume_slider.valueChanged.connect(change_volume)
+    volume_slider.valueChanged.connect(
+        lambda v: (audio.setVolume(v / 100),
+                   settings.update({"music_volume": v}),
+                   save_settings(settings))
+    )
 
     def select_music(name):
-        path = MUSIC_PATH / name
-        if not path.exists():
-            return
-        player.setSource(QUrl.fromLocalFile(str(path)))
-        player.play()
-        movie.start()
-        now_playing.setText(name)
-        settings["last_music"] = name
+        play_song(name)
         settings["music_paused"] = False
         save_settings(settings)
 
+    dots_btn.clicked.connect(
+        lambda: MusicPickerDialog(
+            current_music=settings.get("last_music"),
+            parent=page
+        ).music_selected.connect(select_music)
+    )
+
+    back_btn = QPushButton("Back")
+    back_btn.setFixedSize(120, 50)
+    style_neon_button(back_btn)
+    back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
+
+    layout.addStretch()
+    layout.addWidget(back_btn)
     def open_picker():
-        dlg = MusicPickerDialog(current_music=settings.get("last_music"), parent=page)
+        dlg = MusicPickerDialog(
+            current_music=settings.get("last_music"),
+            parent=page
+        )
         dlg.music_selected.connect(select_music)
         dlg.exec()
 
