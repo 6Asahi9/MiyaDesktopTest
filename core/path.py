@@ -12,8 +12,8 @@ BASE_PATH = get_base_path()
 CONFIG_PATH = BASE_PATH / "config"
 ASSETS_PATH = BASE_PATH / "assets"
 SETTINGS_JSON = CONFIG_PATH / "settings.json"
-
-DEFAULT_AVATAR = ASSETS_PATH / "placeholder_miya.gif"
+MUSIC_PATH = BASE_PATH / "music"
+DEFAULT_AVATAR = ASSETS_PATH / "gif/placeholder_miya.gif"
 
 
 def get_avatar_path():

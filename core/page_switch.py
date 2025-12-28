@@ -51,7 +51,6 @@ def create_app_manager_page(stack):
     def add_file():
         files, _ = QFileDialog.getOpenFileNames(page, "Select EXE files", "", "Executables (*.exe)")
         for f in files:
-            # Skip sensitive system paths
             if "Windows" in f or "Program Files" in f:
                 continue
             if f not in saved_apps:

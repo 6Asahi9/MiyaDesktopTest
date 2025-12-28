@@ -8,30 +8,6 @@ from core.path import SETTINGS_JSON, ASSETS_PATH
 from core.path import get_avatar_path
 
 class FloatingMiya(QWidget):
-    # def __init__(self, gif_path=None):
-    #     super().__init__(
-    #         None,
-    #         Qt.WindowType.FramelessWindowHint |
-    #         Qt.WindowType.WindowStaysOnTopHint |
-    #         Qt.WindowType.Tool
-    #     )
-    #     if gif_path is None:
-    #         gif_path = ASSETS_PATH / "placeholder_miya.gif"
-    #     self.movie = QMovie(str(gif_path))
-
-    #     self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-    #     self.setFixedSize(200, 150)
-
-    #     self.label = QLabel(self)
-    #     self.label.setFixedSize(self.size())
-    #     self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-    #     # self.movie = QMovie(gif_path)
-    #     self.movie.setScaledSize(self.size())
-    #     self.label.setMovie(self.movie)
-    #     self.movie.start()
-
-    #     self._drag_offset: QPoint | None = None
     def __init__(self):
         super().__init__(
             None,

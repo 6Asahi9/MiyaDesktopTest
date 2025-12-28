@@ -14,6 +14,7 @@ from core.page_switch import switch_to_main, create_app_manager_page
 from core.mic_handler import activate_miya_listener
 import keyboard
 from core.path import get_avatar_path
+from core.music import create_music_page
 
 class ToggleAnimation(QPushButton):
     toggled = pyqtSignal(bool)
@@ -68,8 +69,13 @@ class MainWindow(QWidget):
         self.stack = QStackedLayout()
         self.init_main_page()
 
+        # --------------------------
         app_manager_page = create_app_manager_page(self.stack)
         self.stack.addWidget(app_manager_page)
+
+        music_page = create_music_page(self.stack)
+        self.stack.addWidget(music_page)
+        # --------------------------
 
         wrapper_layout = QVBoxLayout(self)
         wrapper_layout.setContentsMargins(0, 0, 0, 0)
@@ -273,6 +279,7 @@ class MainWindow(QWidget):
         self.music_btn = QPushButton("Music")
         self.music_btn.setFixedSize(300, 40)
         self.music_btn.clicked.connect(lambda: print("🎵 Music button clicked"))
+        self.music_btn.clicked.connect(lambda: self.stack.setCurrentIndex(2))
 
         self.custom_btn = QPushButton("Custom", ui_container)
         self.custom_btn.setFixedSize(150, 40)
