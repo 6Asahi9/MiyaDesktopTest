@@ -33,7 +33,14 @@ class MusicPickerDialog(QDialog):
                     btn = QPushButton(name)
                     btn.setFixedHeight(28)
                     if current_music and name == current_music:
-                        btn.setStyleSheet("background-color: #00ffff; color: black;")
+                        btn.setStyleSheet("""
+                            background-color: #00ffff;
+                            color: black;
+                            border: none;
+                            outline: none;
+                        """)
+                    else:
+                        btn.setStyleSheet("border: 2px solid #A9A9A9; border-radius: 4px; outline: none;")
                     btn.clicked.connect(lambda _, n=name: self.select(n))
                     list_layout.addWidget(btn)
             else:
