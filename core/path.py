@@ -14,7 +14,7 @@ ASSETS_PATH = BASE_PATH / "assets"
 SETTINGS_JSON = CONFIG_PATH / "settings.json"
 MUSIC_PATH = BASE_PATH / "music"
 DEFAULT_AVATAR = ASSETS_PATH / "gif/placeholder_miya.gif"
-
+PLAYER_PATH = ASSETS_PATH / "gif/SimpsonsSticker.gif"
 
 def get_avatar_path():
     if SETTINGS_JSON.exists():

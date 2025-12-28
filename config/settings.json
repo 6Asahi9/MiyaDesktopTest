@@ -1,9 +1,12 @@
 {
-    "theme": "dark",
-    "fur": "White",
-    "avatar_visible": true,
-    "startup": false,
-    "apps": {},
-    "floating_miya_enabled": true,
-    "added_apps": []
+  "theme": "dark",
+  "fur": "White",
+  "avatar_visible": true,
+  "startup": false,
+  "apps": {},
+  "floating_miya_enabled": true,
+  "added_apps": [],
+  "music_paused": false,
+  "last_music": "Erika - I Don't Know (looped best part  perfect slowed).mp3",
+  "music_volume": 85
 }

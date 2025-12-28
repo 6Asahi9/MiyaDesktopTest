@@ -73,8 +73,8 @@ class MainWindow(QWidget):
         app_manager_page = create_app_manager_page(self.stack)
         self.stack.addWidget(app_manager_page)
 
-        music_page = create_music_page(self.stack)
-        self.stack.addWidget(music_page)
+        self.music_page, self.music_back_btn = create_music_page(self.stack, self.neon_enabled, self.neon_color)
+        self.stack.addWidget(self.music_page)
         # --------------------------
 
         wrapper_layout = QVBoxLayout(self)
@@ -371,6 +371,8 @@ class MainWindow(QWidget):
             self.style_neon_button(btn)
         for toggle in self.toggle_refs:
             toggle.update_neon_color(self.neon_color)
+        self.style_neon_button(self.music_back_btn)
+        self.update_music_page_neon()
 
     def pick_neon_color(self):
         color = QColorDialog.getColor()
@@ -381,4 +383,18 @@ class MainWindow(QWidget):
             self.update_neon_styles()
             for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn):
                 self.style_neon_button(btn)
+            self.style_neon_button(self.music_back_btn)
+            self.update_music_page_neon()
+
+    def update_music_page_neon(self):
+        if hasattr(self, "music_page"):
+            border_color = self.neon_color if self.neon_enabled else "transparent"
+            self.music_page.setStyleSheet(f"""
+                QFrame#musicNeonFrame {{
+                    border: 2px solid {border_color};
+                    border-radius: 15px;
+                    background-color: #1a1a1a;
+                }}
+            """)
+
 
