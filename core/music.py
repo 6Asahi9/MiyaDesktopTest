@@ -85,6 +85,20 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
                     background-color: #444444;
                 }
             """)
+    def grey_button(btn):
+        btn.setStyleSheet("""
+        QPushButton {
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 15px;
+        }
+        QPushButton:hover {
+            background-color: #444444;
+        }
+    """)
 
     def get_music_files():
         return sorted(f.name for f in MUSIC_PATH.iterdir() if f.is_file())
@@ -148,7 +162,7 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
 
     play_btn = QPushButton("Play / Pause")
     play_btn.setFixedWidth(220)
-    style_neon_button(play_btn)
+    grey_button(play_btn)
 
     # Music progress slider
     progress_slider = QSlider(Qt.Orientation.Horizontal)
@@ -213,7 +227,7 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
 
     dots_btn = QPushButton("⋮")
     dots_btn.setFixedSize(40, 40)
-    style_neon_button(dots_btn)
+    grey_button(dots_btn)
 
     # Playback modes ----------
     playback_mode = "repeat"
@@ -224,7 +238,7 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     straight_btn = QPushButton("Straight")
 
     for btn in (repeat_btn, juggle_btn, straight_btn):
-        style_neon_button(btn)
+        grey_button(btn)
         btn.setFixedWidth(90)
         btn.setFixedHeight(40)
 
