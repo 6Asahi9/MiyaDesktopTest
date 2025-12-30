@@ -25,11 +25,15 @@ def save_settings(settings):
 
 # Add App Dialog ---------------------
 class AddAppDialog(QDialog):
-    def __init__(self, parent=None, existing_names=None):
+    def __init__(self, parent=None, existing_names=None, app_data=None):
         super().__init__(parent)
-        self.setWindowTitle("Add Application")
+
+        self.editing = app_data is not None
+        self.setWindowTitle("Edit Application" if self.editing else "Add Application")
         self.setFixedSize(420, 160)
+
         self.existing_names = existing_names or set()
+        self.original_name = app_data["name"] if app_data else None
 
         layout = QVBoxLayout(self)
 
@@ -38,6 +42,10 @@ class AddAppDialog(QDialog):
 
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Path to executable")
+
+        if app_data:
+            self.name_input.setText(app_data["name"])
+            self.path_input.setText(app_data["path"])
 
         browse_btn = QPushButton("Browse")
         browse_btn.clicked.connect(self.browse_file)
@@ -93,12 +101,13 @@ class AddAppDialog(QDialog):
             return
 
         if name in self.existing_names:
-            QMessageBox.warning(
-                self, "Duplicate Name",
-                "An application with this name already exists.\n"
-                "Please choose a different name."
-            )
-            return
+            if not self.editing or name != self.original_name:
+                QMessageBox.warning(
+                    self, "Duplicate Name",
+                    "An application with this name already exists.\n"
+                    "Please choose a different name."
+                )
+                return
 
         self.accept()
 
@@ -150,7 +159,7 @@ def create_app_manager_page(stack):
         row_layout.setContentsMargins(6, 6, 6, 6)
 
         row.setStyleSheet(
-            "QWidget { border: 1px solid white; font-size: 15px;}"
+            "QWidget { border: 1px solid white; font-size: 15px; border-radius: 8px;}"
         )
 
         name_lbl = QLabel(app["name"])
@@ -166,12 +175,19 @@ def create_app_manager_page(stack):
                 )
 
             row.setStyleSheet(
-                "QWidget { background-color: #00ffff; border: 1px solid black; color: black; font-size: 15px;}"
+                "QWidget { background-color: #00ffff; border: 1px solid black; color: black; font-size: 15px; border-radius: 8px;}"
             )
             selected["widget"] = row
             selected["app"] = app
 
-        row.mousePressEvent = lambda e: select_row()
+        def mousePressEvent(event):
+            if event.button() == Qt.MouseButton.LeftButton:
+                if event.type() == event.Type.MouseButtonDblClick:
+                    edit_app(app, row)
+                else:
+                    select_row()
+
+        row.mousePressEvent = mousePressEvent
 
         content_layout.insertWidget(content_layout.count() - 1, row)
 
@@ -195,6 +211,29 @@ def create_app_manager_page(stack):
 
     add_btn.clicked.connect(add_file)
     back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
+
+    # Edit logic --------------------------------------------
+    def edit_app(app, row_widget):
+        existing_names = {a["name"] for a in saved_apps if a is not app}
+
+        dialog = AddAppDialog(
+            page,
+            existing_names=existing_names,
+            app_data=app
+        )
+
+        if dialog.exec():
+            data = dialog.get_data()
+
+            app["name"] = data["name"]
+            app["path"] = data["path"]
+
+            settings["added_apps"] = saved_apps
+            save_settings(settings)
+
+            labels = row_widget.findChildren(QLabel)
+            labels[0].setText(data["name"])
+            labels[1].setText(data["path"])
 
     # Delete key handling ------------------------------------------
     def keyPressEvent(event):
