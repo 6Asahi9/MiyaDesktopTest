@@ -7,6 +7,8 @@ from PyQt6.QtCore import Qt
 from pathlib import Path
 import json
 from core.path import SETTINGS_JSON
+import os
+import win32com.client
 
 
 # JSON helpers -----------------------------------------
@@ -22,6 +24,41 @@ def save_settings(settings):
     with open(SETTINGS_JSON, "w") as f:
         json.dump(settings, f, indent=4)
 
+def scan_desktop_shortcuts(existing_names):
+    shell = win32com.client.Dispatch("WScript.Shell")
+
+    desktop_paths = [
+        Path.home() / "Desktop",
+        Path("C:/Users/Public/Desktop")
+    ]
+
+    found_apps = []
+
+    for desktop in desktop_paths:
+        if not desktop.exists():
+            continue
+
+        for lnk in desktop.glob("*.lnk"):
+            try:
+                shortcut = shell.CreateShortcut(str(lnk))
+                target = shortcut.Targetpath
+                if not target:
+                    target = str(lnk)
+
+                name = lnk.stem
+
+                if name in existing_names:
+                    continue
+
+                found_apps.append({
+                    "name": name,
+                    "path": target
+                })
+
+            except Exception:
+                continue
+
+    return found_apps
 
 # Add App Dialog ---------------------
 class AddAppDialog(QDialog):
@@ -68,6 +105,8 @@ class AddAppDialog(QDialog):
         self.name_input.returnPressed.connect(self.validate_and_accept)
         self.path_input.returnPressed.connect(self.validate_and_accept)
 
+        self._validating = False
+
     def browse_file(self):
         file, _ = QFileDialog.getOpenFileName(
             self, "Select EXE", "", "Executables (*.exe)"
@@ -75,41 +114,35 @@ class AddAppDialog(QDialog):
         if file:
             self.path_input.setText(file)
 
+
     def validate_and_accept(self):
-        name = self.name_input.text().strip()
-        path = self.path_input.text().strip()
-
-        if not name and not path:
-            QMessageBox.warning(
-                self, "Missing Information",
-                "Please enter both a name and a path."
-            )
+        if self._validating:
             return
+        self._validating = True
+        try:
+            name = self.name_input.text().strip()
+            path = self.path_input.text().strip()
 
-        if not name:
-            QMessageBox.warning(
-                self, "Missing Name",
-                "Please enter an application name."
-            )
-            return
-
-        if not path:
-            QMessageBox.warning(
-                self, "Missing Path",
-                "Please enter a path to the executable."
-            )
-            return
-
-        if name in self.existing_names:
-            if not self.editing or name != self.original_name:
+            if not name or not path:
                 QMessageBox.warning(
-                    self, "Duplicate Name",
-                    "An application with this name already exists.\n"
-                    "Please choose a different name."
+                    self,
+                    "Missing Information",
+                    "Please enter both a name and a path."
                 )
                 return
 
-        self.accept()
+            if name in self.existing_names:
+                if not self.editing or name != self.original_name:
+                    QMessageBox.warning(
+                        self,
+                        "Duplicate Name",
+                        "An application with this name already exists."
+                    )
+                    return
+
+            self.accept()
+        finally:
+            self._validating = False
 
     def get_data(self):
         return {
@@ -127,11 +160,14 @@ def create_app_manager_page(stack):
     # Top bar
     top_bar = QHBoxLayout()
     add_btn = QPushButton("Add")
+    auto_btn = QPushButton("Auto")
     back_btn = QPushButton("Back")
     add_btn.setFixedSize(120, 50)
+    auto_btn.setFixedSize(120, 50)
     back_btn.setFixedSize(120, 50)
 
     top_bar.addWidget(add_btn)
+    top_bar.addWidget(auto_btn)
     top_bar.addStretch()
     top_bar.addWidget(back_btn)
     layout.addLayout(top_bar)
@@ -171,7 +207,7 @@ def create_app_manager_page(stack):
         def select_row():
             if selected["widget"]:
                 selected["widget"].setStyleSheet(
-                    "QWidget { border: 1px solid white;}"
+                    "QWidget { border: 1px solid white; border-radius: 8px; font-size: 15px;}"
                 )
 
             row.setStyleSheet(
@@ -209,8 +245,25 @@ def create_app_manager_page(stack):
 
             add_app_row(data)
 
-    add_btn.clicked.connect(add_file)
-    back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
+    def auto_add_apps():
+        existing_names = {app["name"] for app in saved_apps}
+
+        new_apps = scan_desktop_shortcuts(existing_names)
+
+        if not new_apps:
+            QMessageBox.information(
+                page,
+                "Auto Add",
+                "No new applications were found on the Desktop."
+            )
+            return
+
+        for app in new_apps:
+            saved_apps.append(app)
+            add_app_row(app)
+
+        settings["added_apps"] = saved_apps
+        save_settings(settings)
 
     # Edit logic --------------------------------------------
     def edit_app(app, row_widget):
@@ -234,6 +287,10 @@ def create_app_manager_page(stack):
             labels = row_widget.findChildren(QLabel)
             labels[0].setText(data["name"])
             labels[1].setText(data["path"])
+        
+    add_btn.clicked.connect(add_file)
+    auto_btn.clicked.connect(auto_add_apps)
+    back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
 
     # Delete key handling ------------------------------------------
     def keyPressEvent(event):

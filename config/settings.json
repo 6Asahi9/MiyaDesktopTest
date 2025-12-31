@@ -1,17 +1,12 @@
 {
-    "theme": "dark",
-    "fur": "White",
-    "avatar_visible": true,
-    "startup": false,
-    "apps": {},
-    "floating_miya_enabled": true,
-    "added_apps": [
-        {
-            "name": "tb",
-            "path": "C:/Users/Asahi/Downloads/TranslucentTB-portable-x64/TranslucentTB.exe"
-        }
-    ],
-    "music_paused": false,
-    "last_music": "Undertale OST - fallen down (slowed  reverb).mp3",
-    "music_volume": 19
+  "theme": "dark",
+  "fur": "White",
+  "avatar_visible": true,
+  "startup": false,
+  "apps": {},
+  "floating_miya_enabled": true,
+  "added_apps": [],
+  "music_paused": false,
+  "last_music": "Just The Two Of Us.mp3",
+  "music_volume": 5
 }
