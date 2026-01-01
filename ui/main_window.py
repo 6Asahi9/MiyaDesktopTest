@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QPropertyAnimation, QRect
 from PyQt6.QtGui import QMovie, QFont, QColor
 from core.startup import toggle_startup
-from core.theme import toggle_theme
+from core.theme import toggle_theme, load_theme, save_theme
 from core.avatar_toggle import toggle_avatar , load_settings
 from core.demonMode import toggle_demon_mode
 from core.fur import switch_fur
@@ -15,6 +15,19 @@ from core.mic_handler import activate_miya_listener
 import keyboard
 from core.path import get_avatar_path
 from core.music import create_music_page
+class ThemeLabel(QLabel):
+    def __init__(self, text, main_window, red=False, *args, **kwargs):
+        super().__init__(text, *args, **kwargs)
+        self.main_window = main_window
+        self.red = red
+        self.update_color()
+
+    def update_color(self):
+        if self.red:
+            color = "red"  
+        else:
+            color = self.main_window.bg_colors["text"]
+        self.setStyleSheet(f"color: {color}; font-weight: {'bold' if self.red else 'normal'};")
 
 class ToggleAnimation(QPushButton):
     toggled = pyqtSignal(bool)
@@ -62,6 +75,9 @@ class MainWindow(QWidget):
         self.setWindowTitle("Miya Desktop")
         self.setFixedSize(700, 600)
 
+        self.is_light_theme = load_theme()
+        self.bg_colors = toggle_theme(self.is_light_theme) 
+    
         self.neon_enabled = True
         self.neon_color = "#00ffff"
         self.toggle_refs = []
@@ -99,11 +115,24 @@ class MainWindow(QWidget):
 
         self.init_hotkey_listener()
 
-    # def on_theme_toggled(self, checked: bool):
-    #     bg_color = toggle_theme(checked)
-    #     self.neon_frame.setStyleSheet(f"background-color: {bg_color};")
-    #     text_color = "black" if checked else "white"
-    #     self.left_panel.setStyleSheet(f"* {{ color: {text_color}; }}")
+    def apply_theme_styles(self):
+        font_size = self.font_size_input.value() if hasattr(self, "font_size_input") else 20
+        self.setStyleSheet(f"background-color: {self.bg_colors['bg']}; color: {self.bg_colors['text']};")
+        if hasattr(self, "left_panel"):
+            self.left_panel.setStyleSheet(f"""
+                * {{
+                    color: {self.bg_colors['text']};
+                    font-size: {font_size}px;
+                    font-family: 'Segoe UI';
+                }}
+            """)
+
+    def on_theme_toggled(self, checked: bool):
+        save_theme(checked)                  
+        self.bg_colors = toggle_theme(checked)
+        self.apply_theme_styles() 
+        for label in self.toggle_labels:
+            label.update_color()
 
     def init_hotkey_listener(self):
         print("🔉 Hotkey listener active for Ctrl + M")
@@ -189,9 +218,11 @@ class MainWindow(QWidget):
         toggle.animate_toggle()
         self.toggle_refs.append(toggle)
 
-        label = QLabel(label_text)
+        # label = QLabel(label_text)
+        # self.toggle_labels.append(label)
+        # label.setStyleSheet(f"color: {'red' if red else 'white'}; font-weight: {'bold' if red else 'normal'};")
+        label = ThemeLabel(label_text, self, red=red)
         self.toggle_labels.append(label)
-        label.setStyleSheet(f"color: {'red' if red else 'white'}; font-weight: {'bold' if red else 'normal'};")
 
         row = QHBoxLayout()
         row.addWidget(toggle)
@@ -233,10 +264,7 @@ class MainWindow(QWidget):
         hotkey_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         button_layout.addWidget(hotkey_hint)
 
-        _, theme_widget = self.build_toggle_row("Switch Theme", False, toggle_theme)
-        # self.theme_toggle, theme_widget = self.build_toggle_row("Switch Theme", False)
-        # self.theme_toggle.toggled.connect(self.on_theme_toggled)
-
+        theme_toggle, theme_widget = self.build_toggle_row("Switch Theme", self.is_light_theme, self.on_theme_toggled)
         avatar_toggle , avatar_widget = self.build_toggle_row("Show Miya", True, toggle_avatar)
         _, startup_widget = self.build_toggle_row("Run at Startup", False, toggle_startup)
         _, neon_widget = self.build_toggle_row("Enable Neon Glow", True, self.toggle_neon)
@@ -329,16 +357,17 @@ class MainWindow(QWidget):
         miya_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         fur_row = QHBoxLayout()
+        btn_color = self.bg_colors["text"] if hasattr(self, "bg_colors") else "#ffffff"
         left_btn = QPushButton("⯇")
         left_btn.setStyleSheet("""
             QPushButton {
                 background: transparent;
-                color: white;
-                font-size: 16px;
+                color: {btn_color};
+                font-size: 20px;
                 border: none;
             }
             QPushButton:hover {
-                color: #00ffff;
+                color: {self.neon_color if self.neon_enabled else btn_color};
             }
         """)
         self.fur_label = QLabel("White")
@@ -372,6 +401,11 @@ class MainWindow(QWidget):
 
         self.stack.addWidget(page)
         self.update_neon_styles()
+        self.apply_theme_styles()
+        for label in self.toggle_labels:
+            label.update_color()
+
+        self.apply_font_size()
 
     def toggle_neon(self, checked):
         self.neon_enabled = checked
@@ -405,5 +439,3 @@ class MainWindow(QWidget):
                     background-color: #1a1a1a;
                 }}
             """)
-
-

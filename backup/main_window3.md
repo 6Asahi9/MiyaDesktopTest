@@ -14,6 +14,7 @@ from core.page_switch import switch_to_main, create_app_manager_page
 from core.mic_handler import activate_miya_listener
 import keyboard
 from core.path import get_avatar_path
+from core.music import create_music_page
 
 class ToggleAnimation(QPushButton):
     toggled = pyqtSignal(bool)
@@ -68,8 +69,13 @@ class MainWindow(QWidget):
         self.stack = QStackedLayout()
         self.init_main_page()
 
+        # --------------------------
         app_manager_page = create_app_manager_page(self.stack)
         self.stack.addWidget(app_manager_page)
+
+        self.music_page, self.music_back_btn = create_music_page(self.stack, self.neon_enabled, self.neon_color)
+        self.stack.addWidget(self.music_page)
+        # --------------------------
 
         wrapper_layout = QVBoxLayout(self)
         wrapper_layout.setContentsMargins(0, 0, 0, 0)
@@ -92,7 +98,13 @@ class MainWindow(QWidget):
         wrapper_layout.addWidget(self.warning_bar)
 
         self.init_hotkey_listener()
-    
+
+    # def on_theme_toggled(self, checked: bool):
+    #     bg_color = toggle_theme(checked)
+    #     self.neon_frame.setStyleSheet(f"background-color: {bg_color};")
+    #     text_color = "black" if checked else "white"
+    #     self.left_panel.setStyleSheet(f"* {{ color: {text_color}; }}")
+
     def init_hotkey_listener(self):
         print("🔉 Hotkey listener active for Ctrl + M")
         keyboard.add_hotkey('ctrl+m', self.on_ctrl_m_pressed)
@@ -222,6 +234,9 @@ class MainWindow(QWidget):
         button_layout.addWidget(hotkey_hint)
 
         _, theme_widget = self.build_toggle_row("Switch Theme", False, toggle_theme)
+        # self.theme_toggle, theme_widget = self.build_toggle_row("Switch Theme", False)
+        # self.theme_toggle.toggled.connect(self.on_theme_toggled)
+
         avatar_toggle , avatar_widget = self.build_toggle_row("Show Miya", True, toggle_avatar)
         _, startup_widget = self.build_toggle_row("Run at Startup", False, toggle_startup)
         _, neon_widget = self.build_toggle_row("Enable Neon Glow", True, self.toggle_neon)
@@ -273,6 +288,7 @@ class MainWindow(QWidget):
         self.music_btn = QPushButton("Music")
         self.music_btn.setFixedSize(300, 40)
         self.music_btn.clicked.connect(lambda: print("🎵 Music button clicked"))
+        self.music_btn.clicked.connect(lambda: self.stack.setCurrentIndex(2))
 
         self.custom_btn = QPushButton("Custom", ui_container)
         self.custom_btn.setFixedSize(150, 40)
@@ -364,6 +380,8 @@ class MainWindow(QWidget):
             self.style_neon_button(btn)
         for toggle in self.toggle_refs:
             toggle.update_neon_color(self.neon_color)
+        self.style_neon_button(self.music_back_btn)
+        self.update_music_page_neon()
 
     def pick_neon_color(self):
         color = QColorDialog.getColor()
@@ -374,4 +392,18 @@ class MainWindow(QWidget):
             self.update_neon_styles()
             for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn):
                 self.style_neon_button(btn)
+            self.style_neon_button(self.music_back_btn)
+            self.update_music_page_neon()
+
+    def update_music_page_neon(self):
+        if hasattr(self, "music_page"):
+            border_color = self.neon_color if self.neon_enabled else "transparent"
+            self.music_page.setStyleSheet(f"""
+                QFrame#musicNeonFrame {{
+                    border: 2px solid {border_color};
+                    border-radius: 15px;
+                    background-color: #1a1a1a;
+                }}
+            """)
+
 
