@@ -126,6 +126,7 @@ class MainWindow(QWidget):
                     font-family: 'Segoe UI';
                 }}
             """)
+        self.apply_font_size()
 
     def on_theme_toggled(self, checked: bool):
         save_theme(checked)                  
@@ -194,23 +195,6 @@ class MainWindow(QWidget):
                     background-color: #444444;
                 }}
             """)
-
-    def apply_font_size(self):
-        size = self.font_size_input.value()
-        self.font_size_input.setFont(QFont("Segoe UI", size))
-        self.left_panel.setStyleSheet(f"""
-            * {{
-                font-size: {size}px;
-                font-family: 'Segoe UI';
-            }}
-        """)
-
-        if hasattr(self, "custom_btn"):
-            self.style_neon_button(self.custom_btn)
-
-        for btn in (self.app_btn, self.music_btn, self.color_btn):
-            self.style_neon_button(btn)
-
     
     def build_toggle_row(self, label_text, default_checked, slot_fn=None, red=False):
         toggle = ToggleAnimation(self.neon_color)
@@ -292,16 +276,23 @@ class MainWindow(QWidget):
         self.font_size_input.setRange(8, 26)
         self.font_size_input.setValue(20)
         self.font_size_input.setFixedWidth(60)
-        self.font_size_input.setStyleSheet("""
-            QSpinBox {
+        self.font_size_input.setStyleSheet(f"""
+            QSpinBox {{
                 background: transparent;
-                color: white;
                 border: none;
-            }
-            QSpinBox::up-button, QSpinBox::down-button {
+            }}
+
+            QSpinBox QLineEdit {{
+                background: transparent;
+                color: {self.bg_colors["text"]};
+                font-size: 20px;
+            }}
+
+            QSpinBox::up-button,
+            QSpinBox::down-button {{
                 width: 0px;
                 height: 0px;
-            }
+            }}
         """)
         self.font_size_input.valueChanged.connect(self.apply_font_size)
         font_row.addWidget(font_size_label)
@@ -406,6 +397,42 @@ class MainWindow(QWidget):
             label.update_color()
 
         self.apply_font_size()
+
+    def apply_font_size(self):
+        size = self.font_size_input.value()
+        self.font_size_input.setFont(QFont("Segoe UI", size))
+        self.left_panel.setStyleSheet(f"""
+            * {{
+                font-size: {size}px;
+                font-family: 'Segoe UI';
+            }}
+        """)
+
+        if hasattr(self, "custom_btn"):
+            self.style_neon_button(self.custom_btn)
+
+        for btn in (self.app_btn, self.music_btn, self.color_btn):
+            self.style_neon_button(btn)
+            
+        self.font_size_input.setStyleSheet(f"""
+            QSpinBox {{
+                background: transparent;
+                border: none;
+            }}
+
+            QSpinBox QLineEdit {{
+                background: transparent;
+                color: {self.bg_colors["text"]};
+                font-size: {size}px;
+                font-family: 'Segoe UI';
+            }}
+
+            QSpinBox::up-button,
+            QSpinBox::down-button {{
+                width: 0px;
+                height: 0px;
+            }}
+        """)
 
     def toggle_neon(self, checked):
         self.neon_enabled = checked
