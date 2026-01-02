@@ -310,7 +310,7 @@ class MainWindow(QWidget):
         self.music_btn = QPushButton("Music")
         self.music_btn.setFixedSize(300, 40)
         self.music_btn.setShortcut(QKeySequence("2"))
-        self.music_btn.clicked.connect(lambda: print("🎵 Music button clicked"))
+        self.music_btn.clicked.connect(lambda: print("Music button clicked"))
         self.music_btn.clicked.connect(lambda: self.stack.setCurrentIndex(2))
 
         self.custom_btn = QPushButton("Custom", ui_container)
