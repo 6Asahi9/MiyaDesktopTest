@@ -11,14 +11,26 @@ import os
 import win32com.client
 import winreg
 from PyQt6.QtGui import QKeySequence
+import shutil
 
 # JSON helpers -----------------------------------------
 def load_settings():
     if SETTINGS_JSON.exists():
         with open(SETTINGS_JSON, "r") as f:
-            return json.load(f)
-    return {}
+            data = json.load(f)
+    else:
+        data = {}
 
+    data.setdefault("added_apps", [])
+    data.setdefault("folder_mode", False)
+
+    return data
+
+def prepare_miya_desktop():
+    documents = get_documents_from_registry()
+    miya_desktop = documents / "MiyaDesktop" / "Desktop"
+    miya_desktop.mkdir(parents=True, exist_ok=True)
+    return miya_desktop
 
 def save_settings(settings):
     SETTINGS_JSON.parent.mkdir(parents=True, exist_ok=True)
@@ -35,6 +47,17 @@ def get_desktop_from_registry():
             return Path(os.path.expandvars(value))
     except Exception:
         return None
+    
+def get_documents_from_registry():
+    try:
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+        ) as key:
+            value, _ = winreg.QueryValueEx(key, "Personal")  
+            return Path(os.path.expandvars(value))
+    except Exception:
+        return Path.home() / "Documents"  
 
 def scan_desktop_shortcuts(existing_names):
     shell = win32com.client.Dispatch("WScript.Shell")
@@ -174,6 +197,7 @@ def create_app_manager_page(stack):
     add_btn = QPushButton("Add")
     auto_btn = QPushButton("Auto")
     back_btn = QPushButton("Back")
+    folder_btn = QPushButton("Folder")
     back_btn.setShortcut(QKeySequence(Qt.Key.Key_Escape))
     add_btn.setFixedSize(120, 50)
     add_btn.setShortcut(QKeySequence("1"))
@@ -191,6 +215,20 @@ def create_app_manager_page(stack):
                 }
             """)
     auto_btn.setFixedSize(120, 50)
+    folder_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #333333;
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    padding: 8px 16px;
+                    font-size: 15px;
+                }
+                QPushButton:hover {
+                    background-color: #444444;
+                }
+            """)
+    folder_btn.setFixedSize(120, 50)
     auto_btn.setShortcut(QKeySequence("2"))
     auto_btn.setStyleSheet("""
                 QPushButton {
@@ -222,6 +260,7 @@ def create_app_manager_page(stack):
 
     top_bar.addWidget(add_btn)
     top_bar.addWidget(auto_btn)
+    top_bar.addWidget(folder_btn)
     top_bar.addStretch()
     top_bar.addWidget(back_btn)
     layout.addLayout(top_bar)
@@ -239,6 +278,13 @@ def create_app_manager_page(stack):
 
     settings = load_settings()
     saved_apps = settings.get("added_apps", [])
+    def update_folder_button():
+        if settings["folder_mode"]:
+            folder_btn.setText("Folder ✅")
+        else:
+            folder_btn.setText("Folder ❌")
+
+    update_folder_button()
 
     selected = {"widget": None, "app": None}
 
@@ -299,22 +345,37 @@ def create_app_manager_page(stack):
 
             add_app_row(data)
 
+    def toggle_folder_mode():
+        settings["folder_mode"] = not settings["folder_mode"]
+        save_settings(settings)
+        update_folder_button()
+
     def auto_add_apps():
         existing_names = {app["name"] for app in saved_apps}
-
         new_apps = scan_desktop_shortcuts(existing_names)
-
-        if not new_apps:
-            QMessageBox.information(
-                page,
-                "Auto Add",
-                "No new applications were found on the Desktop."
-            )
-            return
 
         for app in new_apps:
             saved_apps.append(app)
             add_app_row(app)
+
+        if settings.get("folder_mode", False):
+            miya_desktop_path = prepare_miya_desktop()
+            desktop_path = get_desktop_from_registry()
+            if desktop_path and desktop_path.exists():
+                for folder in desktop_path.iterdir():
+                    if folder.is_dir() and folder.name not in existing_names:
+                        target = miya_desktop_path / folder.name
+                        try:
+                            shutil.copytree(folder, target, dirs_exist_ok=True)
+                            folder_app = {
+                                "name": f"{folder.name} 📁",
+                                "path": str(target)
+                            }
+                            saved_apps.append(folder_app)
+                            add_app_row(folder_app)
+                            existing_names.add(folder.name) 
+                        except Exception as e:
+                            print(f"Failed to copy folder {folder}: {e}")
 
         settings["added_apps"] = saved_apps
         save_settings(settings)
@@ -345,12 +406,21 @@ def create_app_manager_page(stack):
     add_btn.clicked.connect(add_file)
     auto_btn.clicked.connect(auto_add_apps)
     back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
+    folder_btn.clicked.connect(toggle_folder_mode)
 
     # Delete key handling ------------------------------------------
     def keyPressEvent(event):
         if event.key() == Qt.Key.Key_Delete and selected["app"]:
             app = selected["app"]
             widget = selected["widget"]
+
+            if "📁" in app["name"]:
+                try:
+                    folder_path = Path(app["path"])
+                    if folder_path.exists() and folder_path.is_dir():
+                        shutil.rmtree(folder_path)
+                except Exception as e:
+                    print(f"Failed to delete folder {app['name']}: {e}")
 
             saved_apps.remove(app)
             settings["added_apps"] = saved_apps
@@ -364,12 +434,10 @@ def create_app_manager_page(stack):
 
     return page
 
-
 # Legacy helpers ------------------------
 def switch_to_app_manager(stack):
     print("Opening App Manager...")
     stack.setCurrentIndex(1)
-
 
 def switch_to_main(stack):
     print("Returning to Main Page")
