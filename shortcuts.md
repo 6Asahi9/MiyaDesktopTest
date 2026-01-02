@@ -40,4 +40,5 @@
 ~Add music in your registry's Music folder~
 ~Don't remove 📁 emoji when editing the name of folder in Add Application~
 ~Settings are in "C:\Users\%USERPROFILE%\Documents\MiyaDesktop"~
-~Add Application doesn't touch any single files or photes on Desktop, only folders and shortcuts~
+~Add Application does not touch individual files or photos on the Desktop —
+only folders and shortcuts. Single files are assumed to be intentional.~
