@@ -16,7 +16,6 @@ def load_startup_setting() -> bool:
 
 def toggle_startup(is_on: bool):
     save_startup_setting(is_on)
-
     if getattr(sys, 'frozen', False):
         app_path = sys.executable
     else:
