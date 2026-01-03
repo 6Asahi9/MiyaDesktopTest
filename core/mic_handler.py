@@ -7,6 +7,9 @@ import sys
 import wave
 import urllib.request
 
+# UI hook (chat bubble)
+from core.avatar_toggle import show_chat_bubble
+
 recognizer = sr.Recognizer()
 
 def internet_available():
@@ -33,6 +36,7 @@ def activate_miya_listener():
             audio = recognizer.listen(source, timeout=5, phrase_time_limit=5)
         except sr.WaitTimeoutError:
             print(f"⏱️ Miya is ignoring you. {model_name}")
+            show_chat_bubble("Miya is ignoring you")
             return
 
     if use_google:
@@ -40,9 +44,11 @@ def activate_miya_listener():
             user_text = recognizer.recognize_google(audio)
         except sr.UnknownValueError:
             print(f"Miya heard nothing understandable. {model_name}")
+            show_chat_bubble("Miya heard nothing understandable")
             return
         except sr.RequestError:
             print(f"Miya is ignoring you. {model_name}")  # Google busy
+            show_chat_bubble("Miya is ignoring you")
             return
 
         user_text = user_text.strip()
@@ -50,13 +56,16 @@ def activate_miya_listener():
 
         if not user_text:
             print(f"Miya is ignoring you. {model_name}")
+            show_chat_bubble("Miya is ignoring you")
             return
 
         if user_text.lower().startswith("open"):
             print(f"Command detected! {model_name}")
             print(f"Handling OPEN command: {user_text} {model_name}")
+            show_chat_bubble(user_text)
         else:
             print(f"Conversation detected — sending to ChatGPT... {model_name}")
+            show_chat_bubble("text coming from chatgpt api")
             send_to_chatgpt(user_text)
 
     else:
@@ -85,15 +94,19 @@ def activate_miya_listener():
 
         except Exception as e:
             print(f"Miya flicked her tail at you. (Vosk error: {e}) {model_name}")
+            show_chat_bubble("Miya flicked her tail at you")
             return
 
         if not user_text:
             print(f"Miya flicked her tail at you. {model_name}")
+            show_chat_bubble("Miya flicked her tail at you")
             return
 
         print(f"You said (offline): \"{user_text}\" {model_name}")
         if user_text.lower().startswith("open"):
             print(f"Command detected! {model_name}")
             print(f"Handling OPEN command: {user_text} {model_name}")
+            show_chat_bubble(user_text)
         else:
-            print(f"Miya flicked her tail at you. {model_name}")  
+            print(f"Miya flicked her tail at you. {model_name}")
+            show_chat_bubble("text coming from chatgpt api")
