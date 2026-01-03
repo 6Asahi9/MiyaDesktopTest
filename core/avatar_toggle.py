@@ -3,6 +3,8 @@ from PyQt6.QtWidgets import QWidget, QLabel, QApplication
 from PyQt6.QtCore import Qt, QSize, QPoint, QTimer
 from PyQt6.QtGui import QMovie
 from core.path import SETTINGS_JSON, get_avatar_path
+from PyQt6.QtCore import QTimer, QPropertyAnimation
+from PyQt6.QtWidgets import QGraphicsOpacityEffect
 
 # ROOT OVERLAY---------------------------------------------------------
 class MiyaOverlay(QWidget):
@@ -23,7 +25,7 @@ class MiyaOverlay(QWidget):
 
         self.text_overlay.move(10, 10)
         self.miya.move(
-            (self.width() - self.miya.width()) // 2,
+            (self.width() - self.miya.width()) // 2 + 100,
             self.height() - self.miya.height() - 10
         )
 
@@ -83,6 +85,30 @@ class FloatingMiya(QWidget):
 class TextOverlay(QWidget):
     AUTO_HIDE_MS = 4000
 
+    def fade_out(self):
+        self.fade_anim.stop()
+        try:
+            self.fade_anim.finished.disconnect()
+        except TypeError:
+            pass
+        self.fade_anim.setStartValue(1)
+        self.fade_anim.setEndValue(0)
+        self.fade_anim.finished.connect(self.hide)
+        self.fade_anim.start()
+
+    def show_text(self, text: str):
+        self.fade_anim.stop()
+        self.label.setText(text)
+        self.show()
+        self.opacity.setOpacity(1)
+        QTimer.singleShot(self.AUTO_HIDE_MS, self.fade_out)
+
+        self.raise_()
+
+    def hide_now(self):
+        self.hide_timer.stop()
+        self.hide()
+
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
@@ -104,20 +130,20 @@ class TextOverlay(QWidget):
         """)
         self.label.setGeometry(0, 0, 360, 110)
 
-        self._timer = QTimer(self)
-        self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self.hide)
+        # opacity effect
+        self.opacity = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacity)
+        self.opacity.setOpacity(1)
 
-        self.hide()
+        # fade animation
+        self.fade_anim = QPropertyAnimation(self.opacity, b"opacity", self)
+        self.fade_anim.setDuration(600)
 
-    def show_text(self, text: str):
-        self.label.setText(text)
-        self.show()
-        self.raise_()
-        self._timer.start(self.AUTO_HIDE_MS)
+        # auto-hide timer (MUST be stored!)
+        self.hide_timer = QTimer(self)
+        self.hide_timer.setSingleShot(True)
+        self.hide_timer.timeout.connect(self.fade_out)
 
-    def hide_now(self):
-        self._timer.stop()
         self.hide()
 
 # Settings helpers-----------------------------
