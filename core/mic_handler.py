@@ -65,8 +65,8 @@ def activate_miya_listener():
             show_chat_bubble(user_text)
         else:
             print(f"Conversation detected — sending to ChatGPT... {model_name}")
-            show_chat_bubble("text coming from chatgpt api")
-            send_to_chatgpt(user_text)
+            response = send_to_chatgpt(user_text)
+            show_chat_bubble(response)
 
     else:
         try:
@@ -109,4 +109,5 @@ def activate_miya_listener():
             show_chat_bubble(user_text)
         else:
             print(f"Miya flicked her tail at you. {model_name}")
-            show_chat_bubble("text coming from chatgpt api")
+            response = send_to_chatgpt(user_text)
+            show_chat_bubble(response)

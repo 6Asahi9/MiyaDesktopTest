@@ -9,5 +9,6 @@
   "run_at_startup": false,
   "neon_enabled": true,
   "neon_color": "#ff55ff",
-  "api_key": "This is the API key for testing"
+  "api_key": "This is the API key for testing",
+  "custom": "C:/Users/Asahi/Pictures/Downloaded/darkAnime.png"
 }

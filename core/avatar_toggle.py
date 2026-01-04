@@ -23,7 +23,8 @@ class MiyaOverlay(QWidget):
         self.text_overlay = TextOverlay(self)
         self.miya = FloatingMiya(self)
 
-        self.text_overlay.move(10, 10)
+        self.text_overlay.move(0, 10)
+        
         self.miya.move(
             (self.width() - self.miya.width()) // 2 + 100,
             self.height() - self.miya.height() - 10
@@ -83,7 +84,7 @@ class FloatingMiya(QWidget):
 
 # Text overlay-----------------------------------
 class TextOverlay(QWidget):
-    AUTO_HIDE_MS = 4000
+    AUTO_HIDE_MS = 6000
 
     def fade_out(self):
         self.fade_anim.stop()
@@ -113,7 +114,7 @@ class TextOverlay(QWidget):
         super().__init__(parent)
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedSize(360, 110)
+        self.setFixedSize(380, 120)
 
         self.label = QLabel(self)
         self.label.setWordWrap(True)
@@ -121,25 +122,21 @@ class TextOverlay(QWidget):
         self.label.setStyleSheet("""
             QLabel {
                 color: #00ff9c;
+                background: black;
                 font-size: 11px;
-                background: rgba(0, 0, 0, 170);
                 padding: 10px;
                 border-radius: 8px;
                 font-family: Consolas, monospace;
             }
         """)
-        self.label.setGeometry(0, 0, 360, 110)
-
-        # opacity effect
+        self.label.setGeometry(0, 0, 380, 120)
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
         self.opacity.setOpacity(1)
-
-        # fade animation
         self.fade_anim = QPropertyAnimation(self.opacity, b"opacity", self)
         self.fade_anim.setDuration(600)
 
-        # auto-hide timer (MUST be stored!)
+        # auto-hide timer 
         self.hide_timer = QTimer(self)
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.fade_out)

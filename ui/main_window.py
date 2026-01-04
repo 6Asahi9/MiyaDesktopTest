@@ -19,6 +19,7 @@ from PyQt6.QtGui import QKeySequence, QShortcut
 from core.startup import load_startup_setting
 from core.neon import load_neon_settings, save_neon_settings
 from core.api_dialog import ApiDialog
+from core.custom_path import CustomPathDialog
 
 class ThemeLabel(QLabel):
     def __init__(self, text, main_window, red=False, *args, **kwargs):
@@ -133,6 +134,10 @@ class MainWindow(QWidget):
 
     def open_api_dialog(self):
         dialog = ApiDialog(self)
+        dialog.exec()
+    
+    def open_custom_dialog(self):
+        dialog = CustomPathDialog(self)
         dialog.exec()
 
     def on_theme_toggled(self, checked: bool):
@@ -320,6 +325,7 @@ class MainWindow(QWidget):
         self.custom_btn.setShortcut(QKeySequence("4"))
         self.custom_btn.move(450, 270)
         self.custom_btn.clicked.connect(lambda: print("Custom clicked"))
+        self.custom_btn.clicked.connect(self.open_custom_dialog)
         self.style_neon_button(self.custom_btn)
         self.custom_btn.show()
 
