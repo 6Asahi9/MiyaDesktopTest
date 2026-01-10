@@ -7,7 +7,7 @@ from PyQt6.QtCore import Qt, QSize, pyqtSignal, QPropertyAnimation, QRect
 from PyQt6.QtGui import QMovie, QFont, QColor
 from core.startup import toggle_startup
 from core.theme import toggle_theme, load_theme, save_theme
-from core.avatar_toggle import toggle_avatar , load_settings
+from core.avatar_toggle import toggle_avatar , load_settings, refresh_floating_miya
 from core.demonMode import toggle_demon_mode
 from core.fur import switch_fur
 import keyboard
@@ -155,7 +155,11 @@ class MainWindow(QWidget):
     def on_ctrl_m_pressed(self):
         print("🎤 Ctrl + M detected — activating Miya listener...")
         activate_miya_listener()
-
+    
+    def reload_miya_gif(self):
+        self.miya_movie.stop()
+        self.miya_movie.setFileName(str(get_avatar_path()))
+        self.miya_movie.start()
 
     def update_neon_styles(self):
         neon_style = f"""
@@ -374,10 +378,11 @@ class MainWindow(QWidget):
         miya_layout = QVBoxLayout()
 
         miya_image = QLabel()
-        movie = QMovie(str(get_avatar_path()))
-        movie.setScaledSize(QSize(200, 150))
-        miya_image.setMovie(movie)
-        movie.start()
+        self.miya_movie = QMovie(str(get_avatar_path()))
+        self.miya_movie.setScaledSize(QSize(200, 150))
+        miya_image.setMovie(self.miya_movie)
+        self.miya_movie.start()
+
         miya_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         fur_row = QHBoxLayout()
@@ -399,8 +404,13 @@ class MainWindow(QWidget):
         right_btn = QPushButton("⯈")
         right_btn.setStyleSheet(left_btn.styleSheet())
 
-        left_btn.clicked.connect(lambda: switch_fur("prev", self.fur_label))
-        right_btn.clicked.connect(lambda: switch_fur("next", self.fur_label))
+        left_btn.clicked.connect(
+            lambda: (switch_fur("prev", self.fur_label), self.reload_miya_gif(), refresh_floating_miya())
+        )
+
+        right_btn.clicked.connect(
+            lambda: (switch_fur("next", self.fur_label), self.reload_miya_gif(), refresh_floating_miya())
+        )
 
         fur_row.addWidget(left_btn)
         fur_row.addWidget(self.fur_label)

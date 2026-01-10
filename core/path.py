@@ -35,14 +35,22 @@ PLAYER_PATH = ASSETS_PATH / "gif/SimpsonsSticker.gif"
 CHAT_BUBBLE = ASSETS_PATH / "gif/ChatBubble.gif"
 
 def get_avatar_path():
-    if SETTINGS_JSON.exists():
-        try:
-            data = json.loads(SETTINGS_JSON.read_text(encoding="utf-8"))
-            custom = data.get("custom_avatar_path")
-            if custom and Path(custom).exists():
-                return Path(custom)
-        except Exception:
-            pass
+    try:
+        data = json.loads(SETTINGS_JSON.read_text(encoding="utf-8"))
+    except Exception:
+        data = {}
+
+    fur = data.get("current_fur", "White")
+
+    if fur.lower() == "custom":
+        custom_path = data.get("custom")
+        if custom_path and Path(custom_path).exists():
+            return Path(custom_path)
+
+    fur_path = ASSETS_PATH / "gif" / f"{fur.lower()}.gif"
+    if fur_path.exists():
+        return fur_path
+
     return DEFAULT_AVATAR
 
 def get_windows_music_folder():

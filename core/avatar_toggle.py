@@ -76,10 +76,16 @@ class FloatingMiya(QWidget):
         self.label = QLabel(self)
         self.label.setFixedSize(self.size())
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
+        
         self.movie = QMovie(str(get_avatar_path()))
         self.movie.setScaledSize(self.size())
         self.label.setMovie(self.movie)
+        self.movie.start()
+
+    def reload_avatar(self):
+        self.movie.stop()
+        self.movie.setFileName(str(get_avatar_path()))
+        self.movie.setScaledSize(self.size())
         self.movie.start()
 
 # Text overlay-----------------------------------
@@ -184,3 +190,7 @@ def hide_chat_bubble():
     if _overlay is None:
         return
     _overlay.text_overlay.hide_now()
+
+def refresh_floating_miya():
+    if _overlay and _overlay.miya:
+        _overlay.miya.reload_avatar()

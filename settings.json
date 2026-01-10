@@ -1,14 +1,15 @@
 {
-  "is_light_theme": false,
-  "floating_miya_enabled": true,
-  "music_paused": true,
-  "last_music": "Just The Two Of Us.mp3",
-  "music_volume": 5,
-  "added_apps": [],
-  "folder_mode": true,
-  "run_at_startup": false,
-  "neon_enabled": true,
-  "neon_color": "#ff55ff",
-  "api_key": "This is the API key for testing",
-  "custom": "C:/Users/Asahi/Pictures/Downloaded/darkAnime.png"
+    "is_light_theme": false,
+    "floating_miya_enabled": true,
+    "music_paused": true,
+    "last_music": "Just The Two Of Us.mp3",
+    "music_volume": 5,
+    "added_apps": [],
+    "folder_mode": true,
+    "run_at_startup": false,
+    "neon_enabled": true,
+    "neon_color": "#55aaff",
+    "api_key": "This is the API key for testing",
+    "custom": "C:/Users/Asahi/Pictures/Gifs/Cat Sleeping Sticker.gif",
+    "current_fur": "White"
 }
