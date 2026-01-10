@@ -13,7 +13,7 @@ from core.fur import switch_fur
 import keyboard
 from core.page_switch import create_app_manager_page
 from core.mic_handler import activate_miya_listener
-from core.path import get_avatar_path
+from core.path import get_avatar_path, SETTINGS_JSON
 from core.music import create_music_page
 from PyQt6.QtGui import QKeySequence, QShortcut
 from core.startup import load_startup_setting
@@ -21,6 +21,7 @@ from core.neon import load_neon_settings, save_neon_settings
 from core.api_dialog import ApiDialog
 from core.custom_path import CustomPathDialog
 from PyQt6.QtCore import QTimer
+import json
 
 class ThemeLabel(QLabel):
     def __init__(self, text, main_window, red=False, *args, **kwargs):
@@ -399,7 +400,15 @@ class MainWindow(QWidget):
                 color: {self.neon_color if self.neon_enabled else btn_color};
             }
         """)
-        self.fur_label = QLabel("White")
+        
+        # Label for the Avatar name------------------------------
+        try:
+            data = json.loads(SETTINGS_JSON.read_text(encoding="utf-8"))
+            current_fur = data.get("current_fur", "White")
+        except Exception:
+                current_fur = "White"
+
+        self.fur_label = QLabel(current_fur)
         self.fur_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right_btn = QPushButton("⯈")
         right_btn.setStyleSheet(left_btn.styleSheet())
