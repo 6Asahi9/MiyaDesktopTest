@@ -44,7 +44,7 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 
 ~Add music in your registry's Music folder~
 
-~Don't remove 📁 emoji when editing the name of folder in Add Application~
+~Don't remove 📁 emoji when editing the name of folder in Add Application , it is there to remind you its a folder~
 
 ~Settings are in "C:\Users%USERPROFILE%\Documents\MiyaDesktop"~
 
