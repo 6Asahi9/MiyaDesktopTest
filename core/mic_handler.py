@@ -34,7 +34,10 @@ def load_settings():
         return {}
 
 def normalize(text):
-    return text.lower().strip()
+    return "".join(
+        c for c in text.lower().strip()
+        if c.isalnum() or c.isspace()
+    )
 
 def find_app_path(spoken_name):
     settings = load_settings()

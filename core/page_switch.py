@@ -368,7 +368,7 @@ def create_app_manager_page(stack):
                         try:
                             shutil.copytree(folder, target, dirs_exist_ok=True)
                             folder_app = {
-                                "name": f"{folder.name} 📁",
+                                "name": f"{folder.name}📁",
                                 "path": str(target)
                             }
                             saved_apps.append(folder_app)
