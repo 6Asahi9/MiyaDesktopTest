@@ -26,6 +26,7 @@ BASE_PATH = get_base_path()
 CONFIG_PATH = MIYA_CONFIG_PATH
 ASSETS_PATH = BASE_PATH / "assets"
 SETTINGS_JSON = CONFIG_PATH / "settings.json"
+DEMON_EXE = BASE_PATH / "demon_runtime" / "FakeUACWPF.exe"
 
 if not SETTINGS_JSON.exists():
     SETTINGS_JSON.write_text("{}", encoding="utf-8")

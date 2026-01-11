@@ -268,15 +268,20 @@ class MainWindow(QWidget):
         _, startup_widget = self.build_toggle_row("Run at Startup", startup_enabled, toggle_startup)
         neon_toggle, neon_widget = self.build_toggle_row("Enable Neon Glow",self.neon_enabled,self.toggle_neon)
         
+        self._demon_resetting = False
         def on_demon_toggled(checked):
+            if self._demon_resetting:
+                return
             toggle_demon_mode(checked)
-            def reset_toggle():
-                demon_toggle.setChecked(False)
-                demon_toggle.animate_toggle()
+            if checked:
+                def reset_toggle():
+                    self._demon_resetting = True
+                    demon_toggle.setChecked(False)
+                    demon_toggle.animate_toggle()
+                    self._demon_resetting = False
 
-            QTimer.singleShot(5000, reset_toggle)
-        demon_toggle, demon_widget = self.build_toggle_row("Override Mode", False, on_demon_toggled, red=True)
-
+                QTimer.singleShot(5000, reset_toggle)
+        demon_toggle, demon_widget = self.build_toggle_row("Override Mode",False,on_demon_toggled,red=True)
 
         self.settings = load_settings()
         avatar_enabled = self.settings.get("floating_miya_enabled", True)
