@@ -142,12 +142,42 @@ class AddAppDialog(QDialog):
 
         self._validating = False
 
+    # def browse_file(self):
+    #     file, _ = QFileDialog.getOpenFileName(
+    #         self, "Select EXE", "", "Executables (*.exe)"
+    #     )
+    #     if file:
+    #         self.path_input.setText(file)
     def browse_file(self):
-        file, _ = QFileDialog.getOpenFileName(
-            self, "Select EXE", "", "Executables (*.exe)"
-        )
-        if file:
-            self.path_input.setText(file)
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Select Type")
+        msg.setText("Do you want to add an EXE file or a Folder?")
+        msg.setIcon(QMessageBox.Icon.Question)
+
+        exe_button = msg.addButton("EXE", QMessageBox.ButtonRole.AcceptRole)
+        folder_button = msg.addButton("Folder", QMessageBox.ButtonRole.AcceptRole)
+        cancel_button = msg.addButton(QMessageBox.StandardButton.Cancel)
+        msg.exec()
+        selected_path = None
+        clicked = msg.clickedButton()
+        if clicked == exe_button:
+            file, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select EXE",
+                "",
+                "Executables (*.exe)"
+            )
+            if file:
+                selected_path = file
+        elif clicked == folder_button:
+            folder = QFileDialog.getExistingDirectory(
+                self,
+                "Select Folder"
+            )
+            if folder:
+                selected_path = folder
+        if selected_path:
+            self.path_input.setText(selected_path)
 
 
     def validate_and_accept(self):

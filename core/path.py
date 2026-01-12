@@ -33,7 +33,7 @@ if not SETTINGS_JSON.exists():
 # MUSIC_PATH = BASE_PATH / "music"
 DEFAULT_AVATAR = ASSETS_PATH / "gif/placeholder_miya.gif"
 PLAYER_PATH = ASSETS_PATH / "gif/SimpsonsSticker.gif"
-CHAT_BUBBLE = ASSETS_PATH / "gif/ChatBubble.gif"
+CHAT_BUBBLE = ASSETS_PATH / "images/TextBackground.png"
 
 def get_avatar_path():
     try:

@@ -19,7 +19,7 @@ def send_to_chatgpt(user_text: str) -> str:
     api_key = load_api_key()
 
     if not api_key:
-        response = "Miya flicks her tail. You forgot the API key."
+        response = "Miya flicks her tail. You forgot the API key. 😾"
         print("[chatgpt_api] Responding with:")
         print(f"    {response}")
         return response
@@ -49,7 +49,7 @@ def send_to_chatgpt(user_text: str) -> str:
 
     response = (
         "Miya squints at you. Oh really? You woke me up for that? "
-        "Say it better next time, human."
+        "Say it better next time, human 😼."
     )
 
     print("[chatgpt_api] Using API key:")

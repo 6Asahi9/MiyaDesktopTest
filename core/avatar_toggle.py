@@ -1,8 +1,8 @@
 import json
 from PyQt6.QtWidgets import QWidget, QLabel, QApplication
 from PyQt6.QtCore import Qt, QSize, QPoint, QTimer
-from PyQt6.QtGui import QMovie
-from core.path import SETTINGS_JSON, get_avatar_path
+from PyQt6.QtGui import QMovie, QPixmap
+from core.path import SETTINGS_JSON, get_avatar_path, CHAT_BUBBLE
 from PyQt6.QtCore import QTimer, QPropertyAnimation
 from PyQt6.QtWidgets import QGraphicsOpacityEffect
 
@@ -109,7 +109,6 @@ class TextOverlay(QWidget):
         self.show()
         self.opacity.setOpacity(1)
         QTimer.singleShot(self.AUTO_HIDE_MS, self.fade_out)
-
         self.raise_()
 
     def hide_now(self):
@@ -122,27 +121,34 @@ class TextOverlay(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(380, 120)
 
-        self.label = QLabel(self)
+        self.bg = QLabel(self)
+        self.bg.setGeometry(0, 0, 380, 120)
+        pixmap = QPixmap(str(CHAT_BUBBLE))
+        pixmap = pixmap.scaled(
+            self.bg.size(),
+            Qt.AspectRatioMode.IgnoreAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.bg.setPixmap(pixmap)
+
+        self.label = QLabel(self.bg)
         self.label.setWordWrap(True)
         self.label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.label.setGeometry(10, 10, 360, 100)
         self.label.setStyleSheet("""
             QLabel {
-                color: #00ff9c;
-                background: black;
-                font-size: 11px;
-                padding: 10px;
-                border-radius: 8px;
+                color: black;
+                font-size: 20px;
                 font-family: Consolas, monospace;
+                background: transparent;
             }
         """)
-        self.label.setGeometry(0, 0, 380, 120)
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
         self.opacity.setOpacity(1)
         self.fade_anim = QPropertyAnimation(self.opacity, b"opacity", self)
         self.fade_anim.setDuration(600)
 
-        # auto-hide timer 
         self.hide_timer = QTimer(self)
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.fade_out)
