@@ -11,6 +11,7 @@ from core.avatar_toggle import toggle_avatar , load_settings, refresh_floating_m
 from core.demonMode import toggle_demon_mode
 from core.fur import switch_fur
 import keyboard
+from PyQt6.QtWidgets import QDialog, QLineEdit
 from core.page_switch import create_app_manager_page
 from core.mic_handler import activate_miya_listener
 from core.path import get_avatar_path, SETTINGS_JSON
@@ -77,6 +78,57 @@ class ToggleAnimation(QPushButton):
         if self.isChecked():
             self.setStyleSheet(f"background-color: {self.neon_color}; border-radius: 12px;")
 
+class GifSizeDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle("GIF Size")
+        self.setFixedSize(220, 140)
+
+        from core.avatar_toggle import load_settings
+        settings = load_settings()
+        size = settings.get("floating_miya_size", {"width": 350, "height": 200})
+        current_w = size.get("width", 350)
+        current_h = size.get("height", 200)
+
+        layout = QVBoxLayout(self)
+
+        row1 = QHBoxLayout()
+        row1.addWidget(QLabel("Width"))
+        self.w = QLineEdit()
+        self.w.setPlaceholderText(str(current_w))
+        row1.addWidget(self.w)
+
+        row2 = QHBoxLayout()
+        row2.addWidget(QLabel("Height"))
+        self.h = QLineEdit()
+        self.h.setPlaceholderText(str(current_h))
+        row2.addWidget(self.h)
+
+        self.apply_btn = QPushButton("Apply")
+        self.apply_btn.clicked.connect(self.validate_and_accept)
+
+        layout.addLayout(row1)
+        layout.addLayout(row2)
+        layout.addWidget(self.apply_btn)
+
+        self.setLayout(layout)
+
+    def validate_and_accept(self):
+        try:
+            w = int(self.w.text() or self.w.placeholderText())
+            h = int(self.h.text() or self.h.placeholderText())
+            if w <= 0 or h <= 0:
+                raise ValueError
+        except ValueError:
+            from PyQt6.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "Invalid Input", "Please enter valid numbers for both width and height!")
+            return
+        self.accept()
+
+    def get_values(self):
+        return int(self.w.text() or self.w.placeholderText()), int(self.h.text() or self.h.placeholderText())
+
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -133,6 +185,13 @@ class MainWindow(QWidget):
                 }}
             """)
         self.apply_font_size()
+
+    def open_gif_size_dialog(self):
+        dialog = GifSizeDialog(self)
+        if dialog.exec():
+            w, h = dialog.get_values()
+            from core.avatar_toggle import apply_floating_miya_size_now
+            apply_floating_miya_size_now(w, h)
 
     def open_api_dialog(self):
         dialog = ApiDialog(self)
@@ -267,7 +326,7 @@ class MainWindow(QWidget):
         startup_enabled = load_startup_setting()
         _, startup_widget = self.build_toggle_row("Run at Startup", startup_enabled, toggle_startup)
         neon_toggle, neon_widget = self.build_toggle_row("Enable Neon Glow",self.neon_enabled,self.toggle_neon)
-        
+
         self._demon_resetting = False
         def on_demon_toggled(checked):
             if self._demon_resetting:
@@ -349,10 +408,18 @@ class MainWindow(QWidget):
         self.style_neon_button(self.custom_btn)
         self.custom_btn.show()
 
+        self.gif_size_btn = QPushButton("Gif Size", ui_container)
+        self.gif_size_btn.setFixedSize(150, 40)
+        self.gif_size_btn.setShortcut(QKeySequence("5"))
+        self.gif_size_btn.move(450, 330)
+        self.gif_size_btn.clicked.connect(self.open_gif_size_dialog)
+        self.style_neon_button(self.gif_size_btn)
+        self.gif_size_btn.show()
+
         self.api_btn = QPushButton("API", ui_container)
         self.api_btn.setFixedSize(150, 40)
-        self.api_btn.setShortcut(QKeySequence("5"))
-        self.api_btn.move(450, 330)
+        self.api_btn.setShortcut(QKeySequence("6"))
+        self.api_btn.move(450, 390)
         self.api_btn.clicked.connect(lambda: print("API clicked"))
         self.api_btn.clicked.connect(self.open_api_dialog)
         self.style_neon_button(self.api_btn)
@@ -468,6 +535,8 @@ class MainWindow(QWidget):
 
         if hasattr(self, "custom_btn"):
             self.style_neon_button(self.custom_btn)
+        if hasattr(self, "gif_size_btn"):
+            self.style_neon_button(self.gif_size_btn)
         if hasattr(self, "api_btn"):
             self.style_neon_button(self.api_btn)
 
@@ -498,7 +567,7 @@ class MainWindow(QWidget):
         self.neon_enabled = checked
         save_neon_settings(enabled=checked)
         self.update_neon_styles()
-        for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn, self.api_btn):
+        for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn, self.gif_size_btn, self.api_btn):
             self.style_neon_button(btn)
         for toggle in self.toggle_refs:
             toggle.update_neon_color(self.neon_color)
@@ -513,7 +582,7 @@ class MainWindow(QWidget):
             for toggle in self.toggle_refs:
                 toggle.update_neon_color(self.neon_color)
             self.update_neon_styles()
-            for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn, self.api_btn):
+            for btn in (self.app_btn, self.music_btn, self.color_btn, self.custom_btn, self.gif_size_btn, self.api_btn):
                 self.style_neon_button(btn)
             self.style_neon_button(self.music_back_btn)
             self.update_music_page_neon()

@@ -14,7 +14,8 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 2 — Open Music Page
 3 — Open Choose Neon Colour
 4 — Open Custom
-5 — Open API
+5 — Open Gif size
+6 — Open API
 
 ### Add Application
 
