@@ -37,7 +37,8 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 1 - puts music on repeat
 2 - puts music on juggle
 3 - puts music on straight
-4 - opens the music list
+4 - opens the music list window
+5 - opens the add music window
 
 ### Specials
 

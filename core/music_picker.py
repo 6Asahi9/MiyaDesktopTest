@@ -27,7 +27,8 @@ class MusicPickerDialog(QDialog):
         list_layout.setSpacing(4)
 
         if MUSIC_PATH.exists():
-            files = sorted(p.name for p in MUSIC_PATH.iterdir() if p.is_file())
+            files = sorted( p.name for p in MUSIC_PATH.iterdir()if p.is_file() and p.suffix.lower() == ".mp3"
+            )
             if files:
                 for name in files:
                     btn = QPushButton(name)

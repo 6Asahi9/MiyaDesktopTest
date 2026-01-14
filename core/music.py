@@ -11,7 +11,9 @@ from PyQt6.QtCore import Qt, QSize, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from core.path import MUSIC_PATH, PLAYER_PATH, SETTINGS_JSON
 from core.music_picker import MusicPickerDialog
-
+from PyQt6.QtWidgets import QDialog, QLineEdit, QMessageBox
+import subprocess, re
+from PyQt6.QtCore import QThread, pyqtSignal
 
 # JSON helpers --------------------------------
 def load_settings():
@@ -28,6 +30,105 @@ def save_settings(data):
         json.dumps(data, indent=2),
         encoding="utf-8"
     )
+
+def open_add_music_dialog(parent=None):
+    dialog = QDialog(parent)
+    dialog.setWindowTitle("Add Music")
+    dialog.setFixedSize(400, 180)
+
+    layout = QVBoxLayout(dialog)
+    layout.setSpacing(12)
+
+    info_label = QLabel("Place yt-dlp, ffmpeg, and ffprobe in the Music folder.\n"
+    "Remove '&list' from the link to avoid downloading FULL playlists.\n"
+    "its frezzing during download is normal")
+    info_label.setStyleSheet(""" color: yellow; font-size:15px; """)
+    info_label.setWordWrap(True)
+    info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    layout.addWidget(info_label)
+
+    url_input = QLineEdit()
+    url_input.setPlaceholderText("Paste YT video URL here")
+    layout.addWidget(url_input)
+
+    btn_layout = QHBoxLayout()
+    download_btn = QPushButton("Download")
+    cancel_btn = QPushButton("Cancel")
+    btn_layout.addWidget(download_btn)
+    btn_layout.addWidget(cancel_btn)
+    layout.addLayout(btn_layout)
+    cancel_btn.clicked.connect(dialog.reject)
+    class YTDLPWorker(QThread):
+        progress = pyqtSignal(int)
+        finished = pyqtSignal()
+        error = pyqtSignal(str)
+
+        def __init__(self, yt_dlp_path, url, output_path):
+            super().__init__()
+            self.yt_dlp_path = yt_dlp_path
+            self.url = url
+            self.output_path = output_path
+
+        def run(self):
+            try:
+                process = subprocess.Popen(
+                    [
+                        str(self.yt_dlp_path),
+                        "-x",
+                        "--audio-format", "mp3",
+                        "-o", str(self.output_path / "%(title)s.%(ext)s"),
+                        self.url
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1
+                )
+
+                for line in process.stdout:
+                    match = re.search(r"(\d{1,3}\.\d{1,2})%", line)
+                    if match:
+                        percent = float(match.group(1))
+                        self.progress.emit(int(percent))
+
+                process.wait()
+                if process.returncode != 0:
+                    self.error.emit(f"yt-dlp exited with code {process.returncode}")
+                else:
+                    self.finished.emit()
+
+            except Exception as e:
+                self.error.emit(str(e))
+    # ----------------------------------------------------------------
+
+    def start_download():
+        url = url_input.text().strip()
+        if not url:
+            QMessageBox.warning(dialog, "Error", "Please paste a URL")
+            return
+
+        yt_dlp_path = MUSIC_PATH / "yt-dlp.exe"
+        if not yt_dlp_path.exists():
+            QMessageBox.warning(dialog, "Error", "yt-dlp.exe not found in Music folder")
+            return
+
+        try:
+            subprocess.run([
+                str(yt_dlp_path),
+                "-x",
+                "--audio-format", "mp3",
+                "--no-playlist",
+                "-o", f"{MUSIC_PATH}/%(title)s.%(ext)s",
+                url
+            ], check=True)
+            QMessageBox.information(dialog, "Done", "Download finished!")
+            dialog.accept()
+        except Exception as e:
+            QMessageBox.critical(dialog, "Error", f"Download failed:\n{e}")
+
+    download_btn.clicked.connect(start_download)
+
+    dialog.exec()
 
 # Music page --------------------------------------------
 def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
@@ -101,7 +202,10 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     """)
 
     def get_music_files():
-        return sorted(f.name for f in MUSIC_PATH.iterdir() if f.is_file())
+        return sorted(
+            f.name for f in MUSIC_PATH.iterdir()
+            if f.is_file() and f.suffix.lower() == ".mp3" and not f.name.startswith(".")
+        )
 
     def load_song(name):
         path = MUSIC_PATH / name
@@ -233,6 +337,11 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     list_btn.setFixedSize(80, 40)
     grey_button(list_btn)
 
+    add_music_btn = QPushButton("Add")
+    add_music_btn.setShortcut(QKeySequence("5"))
+    add_music_btn.setFixedSize(80, 40)
+    grey_button(add_music_btn)
+
     # Playback modes ---------------------------
     playback_mode = "repeat"
 
@@ -258,6 +367,7 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     layout.addSpacing(12)
     layout.addWidget(volume_slider, alignment=Qt.AlignmentFlag.AlignHCenter)
     layout.addWidget(list_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
+    layout.addWidget(add_music_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     def update_mode_buttons():
         for btn, mode in zip((repeat_btn, juggle_btn, straight_btn),
@@ -366,6 +476,7 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     style_neon_button(back_btn)
     back_btn.setShortcut(QKeySequence(Qt.Key.Key_Escape))
     back_btn.clicked.connect(lambda: stack.setCurrentIndex(0))
+    add_music_btn.clicked.connect(lambda: open_add_music_dialog(parent=page))
 
     layout.addStretch()
     layout.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
