@@ -61,3 +61,5 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 ~Miya uses around ~30MB of memory while running. and over 150 during playing music~
 
 ~Removing MiyaDesktop does not delete any user files or folders.~
+
+~App Freezing during download of music through yt-dlp is normal~
