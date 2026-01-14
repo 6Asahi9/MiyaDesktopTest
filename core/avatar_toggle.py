@@ -3,8 +3,9 @@ from PyQt6.QtCore import Qt, QPoint, QTimer
 import json
 from PyQt6.QtGui import QMovie, QPixmap
 from PyQt6.QtWidgets import QGraphicsOpacityEffect
-from core.path import SETTINGS_JSON, get_avatar_path, CHAT_BUBBLE
+from core.path import SETTINGS_JSON, get_avatar_path, CHAT_BUBBLE, FONT_PATH
 from PyQt6.QtCore import QPropertyAnimation
+from PyQt6.QtGui import QFontDatabase, QFont
 
 def load_settings():
     if SETTINGS_JSON.exists():
@@ -19,6 +20,19 @@ def save_settings(settings: dict):
     SETTINGS_JSON.parent.mkdir(parents=True, exist_ok=True)
     with open(SETTINGS_JSON, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=4)
+
+_font_loaded = False
+def load_pixel_font():
+    global _font_loaded
+    if _font_loaded:
+        return
+
+    font_id = QFontDatabase.addApplicationFont(str(FONT_PATH))
+    if font_id == -1:
+        print("pixel font failed to load")
+    else:
+        print("pixel font loaded")
+        _font_loaded = True
 
 class MiyaOverlay(QWidget):
     def __init__(self):
@@ -35,7 +49,7 @@ class MiyaOverlay(QWidget):
         self.miya = None
         self.text_overlay = TextOverlay(self)
         self.miya = FloatingMiya(self)
-        self.text_overlay.move(0, 140)
+        self.text_overlay.move(0, 100)
         self.center_miya()
         self._drag_offset: QPoint | None = None
 
@@ -96,12 +110,12 @@ class FloatingMiya(QWidget):
 
         size = settings.get("floating_miya_size")
         if not size:
-            size = {"width": 350, "height": 200}
+            size = {"width": 400, "height": 400}
             settings["floating_miya_size"] = size
             save_settings(settings)
 
-        w = size.get("width", 350)
-        h = size.get("height", 200)
+        w = size.get("width", 400)
+        h = size.get("height", 400)
 
         self.setFixedSize(w, h)
         self.label.setFixedSize(w, h)
@@ -121,6 +135,7 @@ class TextOverlay(QWidget):
 
     def __init__(self, parent: QWidget):
         super().__init__(parent)
+        load_pixel_font()
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(380, 120)
@@ -139,7 +154,11 @@ class TextOverlay(QWidget):
         self.label.setWordWrap(True)
         self.label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         self.label.setGeometry(10, 10, 360, 100)
-        self.label.setStyleSheet("font-size: 22px; font-family: 'Segoe UI'; color: black;")  
+        self.label.setStyleSheet("""
+            font-family: 'Press Start 2P';
+            font-size: 12px;
+            color: black;
+        """) 
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
         self.opacity.setOpacity(1)

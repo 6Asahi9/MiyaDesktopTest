@@ -366,8 +366,13 @@ def create_music_page(stack, neon_enabled=True, neon_color="#00ffff"):
     layout.addLayout(mode_layout)
     layout.addSpacing(12)
     layout.addWidget(volume_slider, alignment=Qt.AlignmentFlag.AlignHCenter)
-    layout.addWidget(list_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
-    layout.addWidget(add_music_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
+    
+    list_add_layout = QHBoxLayout()
+    list_add_layout.setSpacing(15)
+    list_add_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+    list_add_layout.addWidget(list_btn)
+    list_add_layout.addWidget(add_music_btn)
+    layout.addLayout(list_add_layout)
 
     def update_mode_buttons():
         for btn, mode in zip((repeat_btn, juggle_btn, straight_btn),

@@ -63,7 +63,7 @@ def activate_miya_listener():
             audio = recognizer.listen(source, timeout=5, phrase_time_limit=5)
         except sr.WaitTimeoutError:
             print(f"⏱️ Miya is ignoring you. {model_name}")
-            show_chat_bubble("Miya is ignoring you 😿")
+            show_chat_bubble("Miya is ignoring you :(")
             return
 
     # if use_google:
@@ -120,24 +120,24 @@ def activate_miya_listener():
 
     except Exception as e:
         print(f"Miya flicked her tail at you. (Vosk error: {e}) {model_name}")
-        show_chat_bubble("Miya flicked her tail at you 😾")
+        show_chat_bubble("Miya flicked her tail at you >:(")
         return
 
     if not user_text:
         print(f"Miya flicked her tail at you. {model_name}")
-        show_chat_bubble("Miya flicked her tail at you 😾")
+        show_chat_bubble("Miya flicked her tail at you >:(")
         return
 
     print(f"You said (offline): \"{user_text}\" {model_name}")
     if user_text.lower().startswith("open"):
         app_name = user_text[4:].strip()  
-        show_chat_bubble(f"meow opening {app_name} 😼")
+        show_chat_bubble(f"meow opening {app_name} :3")
 
         path = find_app_path(app_name)
         if path:
             open_path(path)
         else:
-            show_chat_bubble(f"I don't know {app_name} 🙄")
+            show_chat_bubble(f"I don't know {app_name} >:3")
 
     else:
         response = send_to_chatgpt(user_text)

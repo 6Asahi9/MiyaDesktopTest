@@ -58,6 +58,6 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 
 ~Enabling startup does not slow system boot — Miya launches quietly in the background.~
 
-~Miya uses around ~30MB of memory while running.~
+~Miya uses around ~30MB of memory while running. and over 150 during playing music~
 
 ~Removing MiyaDesktop does not delete any user files or folders.~
