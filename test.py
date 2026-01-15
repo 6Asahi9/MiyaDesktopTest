@@ -87,4 +87,7 @@
 #     winreg.SetValueEx(key, "My Music", 0, winreg.REG_EXPAND_SZ, default_music_path)
 
 # print(f"Music folder restored to: {default_music_path}")
+
 # pyinstaller --noconfirm --onedir --windowed --name MiyaDesktop --icon assets/miya.ico --add-data "assets;assets" --add-data "models;models" --add-data "demon_runtime;demon_runtime" --collect-submodules core --collect-submodules models --collect-submodules ui --collect-all PyQt6 --collect-all vosk main.py
+
+# pyinstaller --noconfirm --onedir --windowed --name MiyaDesktop  --icon assets/miya.ico --add-data "assets;assets" --add-data "demon_runtime;demon_runtime" --collect-submodules core --collect-submodules ui --collect-all PyQt6 main.py
