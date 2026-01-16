@@ -59,7 +59,7 @@ The Add Application interface provides both manual and automated ways to registe
 
 Below the controls, a centralized management window displays all added items, where users can rename, edit, or remove entries at any time. Each entry can be assigned a custom name, which Miya can later recognize — when the user presses **Ctrl + M** and says “open {name},” Miya searches this list and opens the matching application or folder if it exists.
 
-All the path gets saved %USERPROFILE%\Documents\MiyaDesktop\config\settings.json 
+All the path gets saved into %USERPROFILE%\Documents\MiyaDesktop\config\settings.json 
 Whereas all the folders done by the "Auto" gets copied into %USERPROFILE%\Documents\MiyaDesktop\Desktop\
 
 ---
