@@ -67,87 +67,114 @@ Multiple playback modes are available, including Repeat (default), Juggle (shuff
 
 ### General
 
-| Key           | Action                                                                                |
-| ------------- | ------------------------------------------------------------------------------------- |
-| **ESC**       | Close current page (Music, Neon Picker, or Add Application) and return to main window |
-| **Backspace** | Minimize the window                                                                   |
+| Key            | Action                                                                                |
+| -------------- | ------------------------------------------------------------------------------------- |
+| **ESC**        | Close current page (Music, Neon Picker, or Add Application) and return to main window |
+| **Backspace**  | Minimize the window                                                                   |
 
 ### Navigation
 
-| Key   | Opens                |
-| ----- | -------------------- |
-| **1** | Add Application Page |
-| **2** | Music Page           |
-| **3** | Choose Neon Colour   |
-| **4** | Custom GIF           |
-| **5** | GIF Size Settings    |
-| **6** | API Settings         |
+| Key            | Opens                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
+| **1**          | Add Application Page                                                                  |
+| **2**          | Music Page                                                                            | 
+| **3**          | Choose Neon Colour                                                                    |
+| **4**          | Custom GIF                                                                            |
+| **5**          | GIF Size Settings                                                                     |
+| **6**          | API Settings                                                                          |
 
 ### Add Application
 
-| Action         | Behavior                      |
-| -------------- | ----------------------------- |
-| Double-tap row | Open edit window              |
-| Tap Delete     | Remove entry from MiyaDesktop |
-| **1**          | Open Add Application window   |
-| **2**          | Toggle Auto Add Applications  |
+| Action         | Behavior                                                                              |
+| -------------- | ------------------------------------------------------------------------------------- |
+| Double-tap row | Open edit window                                                                      |
+| Tap Delete     | Remove entry from MiyaDesktop                                                         |
+| **1**          | Open Add Application window                                                           |
+| **2**          | Toggle Auto Add Applications                                                          |
 
 ### Music controls
 
-| Key       | Action        |
-| --------- | ------------- |
-| **← / →** | Change track  |
-| **↑ / ↓** | Adjust volume |
-| **Enter** | Play / Pause  |
+| Key            | Action                                                                                |
+| -------------- | ------------------------------------------------------------------------------------- |
+| **← / →**      | Change track                                                                          |
+| **↑ / ↓**      | Adjust volume                                                                         |
+| **Enter**      | Play / Pause                                                                          |
 
 ### Playtback modes
 
-| Key   | Mode                  |
-| ----- | --------------------- |
-| **1** | Repeat                |
-| **2** | Juggle (Shuffle)      |
-| **3** | Straight (Sequential) |
-| **4** | Open music list       |
-| **5** | Open add music window |
+| Key            | Mode                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------- |
+| **1**          | Repeat                                                                                |
+| **2**          | Juggle (Shuffle)                                                                      |
+| **3**          | Straight (Sequential)                                                                 |
+| **4**          | Open music list                                                                       |
+| **5**          | Open add music window                                                                 |
 
 ---
 
 ## Limitations & Notes
 
-Voice Recognition
+* **Voice Recognition**
+  * Offline version has limited accuracy.
+  * Online version depends on your network speed.
+  * Speech recognition may be reduced when no internet connection is available.
 
-Offline version has limited accuracy.
+* **Add Application Behavior**
+  * Does not touch individual files or photos on the Desktop — only folders and shortcuts.
+  * Folders are copied, not moved; deleting from Desktop is always the user’s choice.
+  * Users can safely delete Desktop shortcuts after they are registered in MiyaDesktop.
 
-Online version depends on your network speed.
+* **Memory Usage**
+  * MiyaDesktop typically uses ~30 MB of RAM while idle.
+  * While playing music, RAM usage may increase to ~150–180 MB.
 
-Speech recognition may be reduced when no internet connection is available.
+* **Startup & Background**
+  * Enabling startup does not slow system boot; Miya launches quietly in the background.
 
-Add Application Behavior
+* **Music Playback & Download**
+  * Music may stop if the window goes to sleep.
+  * Temporary freezing during music download via yt-dlp is normal.
 
-Does not touch individual files or photos on the Desktop — only folders and shortcuts.
+* **Removal**
+  * Uninstalling MiyaDesktop does not delete any user files or folders.
 
-Folders are copied, not moved; deleting from Desktop is always the user’s choice.
+--- 
 
-Users can safely delete Desktop shortcuts after they are registered in MiyaDesktop.
-
-Memory Usage
-
-MiyaDesktop typically uses ~30 MB of RAM while idle.
-
-While playing music, RAM usage may increase to ~150–180 MB.
-
-Startup & Background
-
-Enabling startup does not slow system boot; Miya launches quietly in the background.
-
-Music Playback & Download
-
-Music may stop if the window goes to sleep.
-
-Temporary freezing during music download via yt-dlp is normal.
-
-Removal
-
-Uninstalling MiyaDesktop does not delete any user files or folders.
+* **Why I Made MiyaDesktop**
+  * **Desktop Clutter and Navigation**  
+    * My desktop was constantly messy, and going deep into folders just to access an application or project became tedious.  
+    * I wanted a simple, organized interface that could handle shortcuts and folders efficiently without affecting important files.
+  * **Music Experience Interruptions**  
+    * Spotify notifications and pop-ups were breaking the flow of listening to music while working or relaxing.  
+    * MiyaDesktop integrates music playback directly into the desktop workflow, making the listening experience seamless.
+  * **Learning Python and PyQt**  
+    * This project served as a learning platform to understand Python and PyQt development deeply, combining functionality with visual design.
 
 ---
+
+* **Special Thanks**  
+  * This project was developed with guidance and support from [ChatGPT](https://chatgpt.com/) — whose advice helped structure the application, organize the README, and refine many features.
+
+--- 
+
+* **For Developers**
+
+  * **Mixing Versions**  
+    * If you want to mix and match versions, an `online` folder has been created.  
+    * You can take files from the `online` folder and replace them in the `core` folder of the project.
+
+  * **Recreating the Project**  
+    * To recreate this project from scratch, you will need the following repository: [FakeUACWPF](https://github.com/6Asahi9/FakeUACWPF).  
+    * Convert that repo into an executable (`exe`) and place it in the `demon_runtime` folder.  
+    * Create a folder named `models` and put `vosk==0.3.45` inside it, renaming it as `vosk`.  
+    * All other dependencies are listed in the `requirements.txt` file.
+
+  * **Building the Executable**  
+    * **Offline Version:**  
+      ```bash
+      pyinstaller --noconfirm --onedir --windowed --name MiyaDesktop --icon assets/miya.ico --add-data "assets;assets" --add-data "models;models" --add-data "demon_runtime;demon_runtime" --collect-submodules core --collect-submodules models --collect-submodules ui --collect-all PyQt6 --collect-all vosk main.py
+      ```
+    * **Online Version:**  
+      ```bash
+      pyinstaller --noconfirm --onedir --windowed --name MiyaDesktop --icon assets/miya.ico --add-data "assets;assets" --add-data "demon_runtime;demon_runtime" --collect-submodules core --collect-submodules ui --collect-all PyQt6 main.py
+      ```
