@@ -39,10 +39,10 @@ The neon system is fully optional — its colors and effects can be adjusted to 
 
 ---
 
-## All GIFS 
+## All GIFs
 
 <p align="center">
-  <img src="media/allgifs.png" alt="MiyaDesktop GIFS" />
+  <img src="media/allgifs.png" alt="MiyaDesktop GIFs" />
 </p>
 
 MiyaDesktop comes with 4 preloaded GIFs and also allows users to load and use their own custom GIFs.
@@ -59,8 +59,8 @@ The Add Application interface provides both manual and automated ways to registe
 
 Below the controls, a centralized management window displays all added items, where users can rename, edit, or remove entries at any time. Each entry can be assigned a custom name, which Miya can later recognize — when the user presses **Ctrl + M** and says “open {name},” Miya searches this list and opens the matching application or folder if it exists.
 
-All the path gets saved into %USERPROFILE%\Documents\MiyaDesktop\config\settings.json 
-Whereas all the folders done by the "Auto" gets copied into %USERPROFILE%\Documents\MiyaDesktop\Desktop\
+All paths are saved into `%USERPROFILE%\Documents\MiyaDesktop\config\settings.json` .
+Folders detected by the 'Auto' feature are copied into `%USERPROFILE%\Documents\MiyaDesktop\Desktop\`
 
 ---
 
@@ -114,7 +114,7 @@ Add button uses YT-DLP to download music which goes in %USERPROFILE%\Music
 | **← / →**      | Change track                                                                          |
 | **Enter**      | Play / Pause                                                                          |
 
-### Playtback modes
+### Playback modes
 
 | Key            | Mode                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------- |
@@ -136,6 +136,8 @@ Add button uses YT-DLP to download music which goes in %USERPROFILE%\Music
   * Online Version  
     * Uses Google’s online speech recognition API.  
     * Accuracy depends on network speed and connection quality.
+  
+  * To activate voice Recognition simple do **Ctrl+M** then "open {name}" 
 
 * **Add Application Behavior**
   * Does not touch individual files or photos on the Desktop — only folders and shortcuts.
