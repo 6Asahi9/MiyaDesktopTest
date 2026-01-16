@@ -1,4 +1,4 @@
-⚠️ Offline voice mode has limited performance ⚠️
+⚠️ Offline version has limited voice accuracy but online version depends on your network speed⚠️
 Speech recognition accuracy may be reduced when no internet connection is available.
 
 ## Controls & Behavior
@@ -46,8 +46,6 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 
 ~Add music in your registry's Music folder~
 
-~Don't remove 📁 emoji when editing the name of folder in Add Application , it is there to remind you its a folder~
-
 ~Settings are in "C:\Users%USERPROFILE%\Documents\MiyaDesktop"~
 
 ~Add Application does not touch individual files or photos on the Desktop — only folders and shortcuts. Single files are assumed to be intentional.~
@@ -63,3 +61,5 @@ Speech recognition accuracy may be reduced when no internet connection is availa
 ~Removing MiyaDesktop does not delete any user files or folders.~
 
 ~App Freezing during download of music through yt-dlp is normal~
+
+~App may stop the music if window goes to sleep~
