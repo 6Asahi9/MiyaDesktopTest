@@ -23,7 +23,7 @@ MiyaDesktop’s main interface acts as a central control hub for all features of
 
 The interface also includes controls for toggling Miya’s animated display, adjusting font and GIF size, and configuring API access for the online version. A clearly marked red Override Mode button provides advanced control over restricted system paths for experienced users.
 
-The Custom button allows users to upload and use their own GIF instead of the four built-in options, which is then displayed in the live preview window outside the main MiyaDesktop panel.
+The Custom button allows users to load and use their own GIF present on their own system instead of the four built-in options, which is then displayed in the live preview window outside the main MiyaDesktop panel.
 
 ---
 
@@ -36,6 +36,16 @@ The Custom button allows users to upload and use their own GIF instead of the fo
 MiyaDesktop’s Neon mode lets users customize the visual style of interface elements, including button highlights, toggles, and window borders.
 
 The neon system is fully optional — its colors and effects can be adjusted to suit different moods, or disabled completely for a neutral, distraction-free interface.
+
+---
+
+## All GIFS 
+
+<p align="center">
+  <img src="media/allgifs.png" alt="MiyaDesktop GIFS" />
+</p>
+
+MiyaDesktop comes with 4 preloaded GIFs and also allows users to load and use their own custom GIFs.
 
 ---
 
